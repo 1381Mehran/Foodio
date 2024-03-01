@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     # Necessary apps
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
     # MyApps
     'account.apps.AccountConfig',
@@ -133,5 +135,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
 
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'JWT_BLACKLIST_AFTER_ROTATION': True,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30)
 }

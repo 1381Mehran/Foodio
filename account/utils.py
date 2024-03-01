@@ -13,9 +13,10 @@ class Authentication:
     otp_expiration = settings.OTP_EXPIRATION
 
     def otp_generator(self, size: int = size, char: str = digits) -> str:
-        return ''.join(secret_choice(char) for _ in range(size))
 
-    def login(self, phone: str, password: str = None, *args, **kwargs):
+        return "".join(secret_choice(char) for _ in range(size))
+
+    def login(self, phone: str, password: str = None, *args, **kwargs) -> str:
         if password:
             try:
                 user = get_user_model().objects.get(phone=phone)
@@ -27,34 +28,48 @@ class Authentication:
                     code = self.otp_generator()
                     cache.set(phone, code, settings.OTP_EXPIRATION * 60)
 
-                    return int(code)
-
-                else:
-                    return 'Wrong password'
+                    return code
 
             except get_user_model().DoesNotExist:
-                return 'Invalid phone number'
+                return 'Invalid phone number or password'
 
         else:
 
             code = self.otp_generator()
             cache.set(phone, code, settings.OTP_EXPIRATION * 60)
 
-            return int(code)
+            return code
 
     def verify(self, phone: int, code: int, *args, **kwargs):
 
-        correct_code = int(cache.get(phone))
+        correct_code = cache.get(phone) if cache.get(phone) else None
 
         if correct_code:
             if code == correct_code:
-                user = get_user_model().objects.get(phone=phone)
+
+                cache.delete(phone)
+
+                user, status = get_user_model().objects.get_or_create(phone=phone)
+
                 refresh = RefreshToken.for_user(user)
                 return {
                     'refresh': str(refresh),
                     'access': str(refresh.access_token)
-                }
+                }, status
             else:
-                return 'code is invalid'
+                return 'code is invalid', False
         else:
-            return 'OTP expired'
+            return 'OTP expired', False
+
+    def logout(self, request):
+        refresh_token = request.data.get('refresh')
+
+        try:
+
+            refresh_token = RefreshToken(refresh_token)
+            refresh_token.blacklist()
+
+            return 'You logged out successfully', True
+
+        except Exception as e:
+            return str(e.args[0]), False
