@@ -23,8 +23,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Necessary apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+
     # MyApps
     'account.apps.AccountConfig',
+
+
 
 ]
 
@@ -113,3 +119,19 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'account.User'
+
+# Relating to OTP
+
+OTP_SIZE = 6  # OTP length
+OTP_EXPIRATION = 2  # minutes
+
+
+# Rest Framework Configuration
+
+REST_FRAMEWORK = {
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
