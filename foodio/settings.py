@@ -31,7 +31,7 @@ INSTALLED_APPS = [
 
     # MyApps
     'account.apps.AccountConfig',
-
+    'admin_section.apps.AdminSectionConfig',
 
 
 ]
