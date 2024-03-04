@@ -3,6 +3,11 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 
+######################################################
+#                    Models_schemas                  #
+######################################################
+
+
 class AdminSchema(models.Model):
     class AdminPosition(models.TextChoices):
         FINANCIAL = 'financial', _('Financial')
@@ -15,27 +20,37 @@ class AdminSchema(models.Model):
                                 verbose_name=_('User')
                                 )
 
-    national_id = models.CharField(max_length=11)
+    national_id = models.CharField(
+        _('National ID'),
+        max_length=10
+    )
 
-    sheba_number = models.CharField(max_length=20)
+    sheba_number = models.CharField(
+        _('Sheba Number'),
+        max_length=24
+    )
 
     image = models.ImageField(verbose_name=_('image'),
                               upload_to='images/admins/%Y/%m/%d/',
                               blank=True, null=True
                               )
 
-
     position = models.CharField(_('Position'),
-                                      max_length=10,
-                                      choices=AdminPosition,
-                                      default=AdminPosition.FINANCIAL
-                                      )
+                                max_length=10,
+                                choices=AdminPosition,
+                                default=AdminPosition.FINANCIAL
+                                )
 
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     is_active = models.BooleanField(_('Active'), default=True)
 
     class Meta:
         abstract = True
+
+
+######################################################
+#                       END                          #
+######################################################
 
 
 class Admin(AdminSchema):
