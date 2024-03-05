@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
+from account.models import User
 
 ######################################################
 #                    Models_schemas                  #
@@ -15,11 +16,6 @@ class AdminSchema(models.Model):
         SUPPORT = 'support', _('Support')
         PRODUCT = 'product', _('Product')
 
-    user = models.OneToOneField(get_user_model(),
-                                on_delete=models.CASCADE,
-                                verbose_name=_('User')
-                                )
-
     national_id = models.CharField(
         _('National ID'),
         max_length=10
@@ -31,7 +27,7 @@ class AdminSchema(models.Model):
     )
 
     image = models.ImageField(verbose_name=_('image'),
-                              upload_to='images/admins/%Y/%m/%d/',
+                              upload_to='images/admins',
                               blank=True, null=True
                               )
 
@@ -54,21 +50,52 @@ class AdminSchema(models.Model):
 
 
 class Admin(AdminSchema):
+    user = models.OneToOneField(User,
+                                on_delete=models.CASCADE,
+                                verbose_name=_('User'),
+                                related_name='fodio_admin'
+                                )
 
     class Meta:
         db_table = 'admin_section'
         verbose_name = _('Admin')
         verbose_name_plural = _('Admins')
 
+    def __str__(self):
+        if self.user.first_name and self.user.last_name:
+            return f'{self.user.first_name} {self.user.last_name}'
+        elif self.user.first_name:
+            return f'{self.user.first_name}'
+        elif self.user.last_name:
+            return f'{self.user.last_name}'
+        else:
+            return f'{self.user.phone}'
+
 
 class Staff(AdminSchema):
     admin = models.ForeignKey(Admin,
                               on_delete=models.CASCADE,
-                              related_name='staffs',
-                              verbose_name=_('admin_section')
+                              related_name='admin_staff',
+                              verbose_name=_('Admin User')
                               )
+
+    user = models.OneToOneField(User,
+                                on_delete=models.CASCADE,
+                                verbose_name=_('User'),
+                                related_name='fodio_staff'
+                                )
 
     class Meta:
         db_table = 'staffs'
         verbose_name = _('staff')
         verbose_name_plural = _('staffs')
+
+    def __str__(self):
+        if self.user.first_name and self.user.last_name:
+            return f'{self.user.first_name} {self.user.last_name}'
+        elif self.user.first_name:
+            return f'{self.user.first_name}'
+        elif self.user.last_name:
+            return f'{self.user.last_name}'
+        else:
+            return f'{self.user.phone}'

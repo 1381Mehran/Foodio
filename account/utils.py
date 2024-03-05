@@ -4,6 +4,7 @@ from secrets import choice as secret_choice
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.contrib.auth.hashers import check_password
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -21,7 +22,7 @@ class Authentication:
             try:
                 user = get_user_model().objects.get(phone=phone)
 
-                status = user.check_password(password)
+                status = check_password(password, user.password)
 
                 if status:
 
@@ -30,6 +31,8 @@ class Authentication:
 
                     return code
 
+                else:
+                    return 'Invalid phone number or password'
             except get_user_model().DoesNotExist:
                 return 'Invalid phone number or password'
 

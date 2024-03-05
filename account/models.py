@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import check_password
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -32,7 +33,7 @@ class User(AbstractUser):
     )
     password = models.CharField(
         _('password'),
-        max_length=30,
+        max_length=512,
         blank=True,
         null=True
     )
@@ -57,6 +58,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
 
+
     def __str__(self):
         if self.first_name and self.last_name:
             return f'{self.first_name} {self.last_name}'
@@ -66,6 +68,12 @@ class User(AbstractUser):
             return f'{self.last_name}'
         else:
             return f'{self.phone}'
+
+    def save(self, *args, **kwargs):
+        if self.password:
+            self.set_password(self.password)
+
+        super(User, self).save(*args, **kwargs)
 
 
 class CardNumber(models.Model):
