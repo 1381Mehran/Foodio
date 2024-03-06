@@ -1,12 +1,13 @@
-from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 from enum import Enum, unique
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
 
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
 from ..models import Admin
+from account.utils import Authentication
 
 
 class ImprovePositionSerializer(serializers.Serializer):
@@ -70,22 +71,40 @@ class ImprovePositionSerializer(serializers.Serializer):
         return obj
 
     def validate_password(self, obj):
-        if not any(True if char in ascii_lowercase else False for char in obj):
-            raise ValidationError('password must contain at least one lowercase')
 
-        if not any(True if _ in ascii_uppercase else False for _ in obj):
-            raise ValidationError('password must contain at least one UpperCase')
+        status, errors = Authentication.check_password_format(obj)
 
-        if not any(True if _ in digits else False for _ in obj):
-            raise ValidationError('password must contain at least one digits')
-
-        if not any(True if _ in punctuation else False for _ in obj):
-            raise ValidationError('password must contain at least one Symbol')
+        if not status:
+            raise ValidationError(errors)
 
         return obj
 
     def validate(self, attrs):
-        if attrs.get('level') == 'staff' and 'admin' not in attrs:
+        if attrs.get('level') == 'staff' and 'admin_id' not in attrs:
             raise ValidationError('admin field is required for staff level')
 
         return attrs
+
+
+class ChangeAdminOrStaffPasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=100, min_length=8)
+    new_password = serializers.CharField(max_length=100, min_length=8)
+
+    def validate_old_password(self, obj):
+        request = self.context.get('request')
+
+        status = check_password(obj, request.user.password)
+
+        if not status:
+            raise ValidationError('old password is incorrect')
+
+        return obj
+
+    def validate_new_password(self, obj):
+        status, errors = Authentication.check_password_format(obj)
+
+        if not status:
+            raise ValidationError(errors)
+
+        return obj
+

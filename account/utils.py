@@ -1,6 +1,6 @@
 from string import digits, ascii_letters, punctuation, ascii_uppercase, ascii_lowercase
 from secrets import choice as secret_choice
-import uuid
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -30,6 +30,27 @@ class Authentication:
             return self.password_generator
 
         return password
+
+    @staticmethod
+    def check_password_format(password: str) -> Any:
+
+        errors = []
+
+        if not any(True if char in ascii_lowercase else False for char in password):
+            errors.append('password must contain at least one lowercase')
+
+        if not any(True if _ in ascii_uppercase else False for _ in password):
+            errors.append('password must contain at least one UpperCase')
+
+        if not any(True if _ in digits else False for _ in password):
+            errors.append('password must contain at least one digits')
+
+        if not any(True if _ in punctuation else False for _ in password):
+            errors.append('password must contain at least one punctuation')
+
+        status = False if len(errors) > 0 else True
+
+        return status, errors
 
     def login(self, phone: str, password: str = None, *args, **kwargs) -> str:
         if password:

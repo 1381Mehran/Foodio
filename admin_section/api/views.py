@@ -1,13 +1,13 @@
 from django.db import IntegrityError
 
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import *
 from extensions.renderers import CustomJSONRenderer
-from ..permissions import IsSuperUser
+from ..permissions import IsSuperUser, IsAdminOrStaff
 from ..models import Admin, Staff
 from account.utils import Authentication
 from extensions.api_exceptions import SerializerException
@@ -81,3 +81,25 @@ class ImprovePositionView(CreateAPIView):
 
         else:
             raise SerializerException(serializer.errors)
+
+
+class ChangeAdminOrStaffPasswordView(UpdateAPIView):
+    permission_classes = [IsAdminOrStaff]
+    renderer_classes = [CustomJSONRenderer]
+    serializer_class = ChangeAdminOrStaffPasswordSerializer
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+
+        if serializer.is_valid():
+            new_password = serializer.data.get('new_password')
+
+            user = get_user_model().objects.get(phone=request.user.phone)
+            user.password = new_password
+            user.save(update_fields=['password'])
+
+            return Response({'message': 'Done!'}, status.HTTP_200_OK)
+
+        else:
+            raise SerializerException(serializer.errors)
+
