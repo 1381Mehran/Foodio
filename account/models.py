@@ -31,6 +31,19 @@ class User(AbstractUser):
         blank=True,
         null=True
     )
+
+    national_id = models.CharField(
+        _('National ID'),
+        max_length=10,
+        null=True,
+        blank=True
+    )
+
+    image = models.ImageField(verbose_name=_('image'),
+                              upload_to='images/users',
+                              blank=True, null=True
+                              )
+
     password = models.CharField(
         _('password'),
         max_length=512,
@@ -85,6 +98,14 @@ class CardNumber(models.Model):
         blank=True,
         null=True
     )
+
+    sheba_number = models.CharField(
+        _('Sheba Number'),
+        max_length=24,
+        null=True,
+        blank=True
+    )
+
     is_active = models.BooleanField(
         _('active status'),
         default=False

@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from account.models import User
@@ -15,21 +14,6 @@ class AdminSchema(models.Model):
         TECHNICAL = 'technical', _('Technical')
         SUPPORT = 'support', _('Support')
         PRODUCT = 'product', _('Product')
-
-    national_id = models.CharField(
-        _('National ID'),
-        max_length=10
-    )
-
-    sheba_number = models.CharField(
-        _('Sheba Number'),
-        max_length=24
-    )
-
-    image = models.ImageField(verbose_name=_('image'),
-                              upload_to='images/admins',
-                              blank=True, null=True
-                              )
 
     position = models.CharField(_('Position'),
                                 max_length=10,

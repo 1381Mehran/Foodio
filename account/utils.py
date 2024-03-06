@@ -1,5 +1,6 @@
-from string import digits
+from string import digits, ascii_letters, punctuation, ascii_uppercase, ascii_lowercase
 from secrets import choice as secret_choice
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -16,6 +17,19 @@ class Authentication:
     def otp_generator(self, size: int = size, char: str = digits) -> str:
 
         return "".join(secret_choice(char) for _ in range(size))
+
+    @property
+    def password_generator(self):
+        selection_list = digits + ascii_letters + '!#$%&*+-/<=>?@\_~^'
+        password = ''.join(secret_choice(selection_list) for _ in range(8))
+
+        if (not any(True if char in ascii_uppercase else False for char in password) or
+                not any(True if char in ascii_lowercase else False for char in password) or
+                not any(True if char in digits else False for char in password) or
+                not any(True if char in punctuation else False for char in password)):
+            return self.password_generator
+
+        return password
 
     def login(self, phone: str, password: str = None, *args, **kwargs) -> str:
         if password:
@@ -76,3 +90,6 @@ class Authentication:
 
         except Exception as e:
             return str(e.args[0]), False
+
+
+

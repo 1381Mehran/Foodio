@@ -18,7 +18,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(CardNumber)
 class CardNumberAdmin(admin.ModelAdmin):
-    list_display = ('get_user_phone', 'card_number', 'is_active')
+    list_display = ('get_user_phone', 'card_number', 'sheba_number', 'is_active')
     search_fields = ('card_number', 'user__phone')
 
     def get_user_phone(self, obj):
