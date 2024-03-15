@@ -13,7 +13,6 @@ DEBUG = os.getenv('DEBUG', default=False)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -33,7 +32,7 @@ INSTALLED_APPS = [
     # MyApps
     'account.apps.AccountConfig',
     'admin_section.apps.AdminSectionConfig',
-
+    'product.apps.ProductConfig',
 
 ]
 
