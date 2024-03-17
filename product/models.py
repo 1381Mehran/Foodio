@@ -1,5 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from django.db import models
+from datetime import datetime
 
 
 #######################################
@@ -90,6 +91,13 @@ class Product(models.Model):
         blank=True
     )
 
+    is_active = models.BooleanField(
+        _('is active'),
+        default=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'))
+
     class Meta:
         db_table = 'Products'
         verbose_name = _('product')
@@ -118,6 +126,13 @@ class ProductImage(models.Model):
         default=ImageType.SUB,
         max_length=6
     )
+
+    is_active = models.BooleanField(
+        _('is active'),
+        default=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
 
     class Meta:
         db_table = 'product_images'
@@ -149,6 +164,13 @@ class ProductProperty(models.Model):
         _('item detail'),
         max_length=300
     )
+
+    is_active = models.BooleanField(
+        _('is active'),
+        default=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'))
 
     class Meta:
         db_table = 'Product_properties'
