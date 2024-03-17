@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'admin_section.apps.AdminSectionConfig',
     'product.apps.ProductConfig',
+    'seller.apps.SellerConfig',
 
 ]
 
