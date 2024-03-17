@@ -109,13 +109,14 @@ class ProductImage(models.Model):
         verbose_name=_('product')
     )
     image = models.ImageField(
-        upload_to=f'images/product/{product.title}',
+        upload_to=f'images/product',
         verbose_name=_('image')
     )
     type = models.CharField(
         _('type'),
         choices=ImageType.choices,
-        default=ImageType.SUB
+        default=ImageType.SUB,
+        max_length=6
     )
 
     class Meta:
