@@ -3,7 +3,7 @@ from django.db import models
 
 
 #######################################
-#         Product Model Schema        #
+#    Product Category Model Schema    #
 #######################################
 
 
@@ -25,10 +25,6 @@ class ProductCategorySchema(models.Model):
 
     class Meta:
         abstract = True
-
-
-class ProductSchema(models.Model):
-    pass
 
 
 #######################################
@@ -70,3 +66,90 @@ class SubCat(ProductCategorySchema):
         db_table = 'sub_categories'
         verbose_name = _('Sub Category')
         verbose_name_plural = _('Sub Categories')
+
+
+#######################################
+#       Products Models Schema        #
+#######################################
+
+class Product(models.Model):
+    title = models.CharField(
+        _('title')
+        , max_length=450
+    )
+    category = models.ForeignKey(
+        SubCat,
+        on_delete=models.CASCADE,
+        related_name='product_categories',
+        verbose_name=_('Sub Category')
+    )
+
+    introduce = models.TextField(
+        _('introduce'),
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        db_table = 'Products'
+        verbose_name = _('product')
+        verbose_name_plural = _('products')
+
+
+class ProductImage(models.Model):
+
+    class ImageType(models.TextChoices):
+        BANNER = 'banner', 'Banner'
+        SUB = 'sub', 'Sub'
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='product_images',
+        verbose_name=_('product')
+    )
+    image = models.ImageField(
+        upload_to=f'images/product/{product.title}',
+        verbose_name=_('image')
+    )
+    type = models.CharField(
+        _('type'),
+        choices=ImageType.choices,
+        default=ImageType.SUB
+    )
+
+    class Meta:
+        db_table = 'product_images'
+        verbose_name = 'image'
+        verbose_name_plural = _('images')
+
+
+class ProductProperty(models.Model):
+    class PropertyType(models.TextChoices):
+        PROPERTY = 'property', 'Property'
+        SPECIFICATION = 'specification', 'Specification'
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='product_properties',
+        verbose_name=_('product')
+    )
+    item_type = models.CharField(
+        _('item type'),
+        choices=PropertyType.choices,
+        max_length=14
+    )
+    item_name = models.CharField(
+        _('item name'),
+        max_length=50,
+    )
+    item_detail = models.CharField(
+        _('item detail'),
+        max_length=300
+    )
+
+    class Meta:
+        db_table = 'Product_properties'
+        verbose_name = 'Product property'
+        verbose_name_plural = _('Product properties')
