@@ -18,7 +18,7 @@ class AdminSchema(models.Model):
     position = models.CharField(_('Position'),
                                 max_length=10,
                                 choices=AdminPosition,
-                                default=AdminPosition.FINANCIAL
+                                default=None
                                 )
 
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
