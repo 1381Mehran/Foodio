@@ -140,6 +140,9 @@ AUTH_USER_MODEL = 'account.User'
 OTP_SIZE = 6  # OTP length
 OTP_EXPIRATION = 2  # minutes
 
+# Relating to Pagination
+
+PAGE_SIZE = 5
 
 # Rest Framework Configuration
 
@@ -150,6 +153,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'JWT_BLACKLIST_AFTER_ROTATION': True,
+
+    'DEFAULT_PAGINATION_CLASS': 'extensions.paginations.CustomPagination',
 }
 
 SIMPLE_JWT = {

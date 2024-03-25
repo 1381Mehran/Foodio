@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
-from ..models import State
+from ..models import State, Seller
 
 
 class RetrieveStateSerializer(serializers.Serializer):
@@ -57,3 +57,11 @@ class CreateAndUpdateStateSerializer(serializers.ModelSerializer):
     #     return obj
 
 
+class SellerSerializer(serializers.ModelSerializer):
+
+    state = serializers.PrimaryKeyRelatedField(queryset=State.objects.filter(
+        is_active=True, type='city', parent__isnull=False))
+
+    class Meta:
+        model = Seller
+        fields = ('work_class', 'work_class_number', 'state', 'address')

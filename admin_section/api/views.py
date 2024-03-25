@@ -1,16 +1,21 @@
+from enum import Enum, unique
+
 from django.db import IntegrityError
+from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import *
+from product.models import Product
+from .serializers import (ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer)
 from extensions.renderers import CustomJSONRenderer
-from ..permissions import IsSuperUser, IsAdminOrStaff
+from ..permissions import IsSuperUser, IsAdminOrStaff, IsProductAdmin
 from ..models import Admin, Staff
 from account.utils import Authentication
 from extensions.api_exceptions import SerializerException
+from seller.models import Seller
 
 
 class ImprovePositionView(CreateAPIView):
@@ -102,4 +107,14 @@ class ChangeAdminOrStaffPasswordView(UpdateAPIView):
 
         else:
             raise SerializerException(serializer.errors)
+
+
+# Relating to Seller
+
+
+class SellerListView(ListAPIView):
+    serializer_class = SellerSerializer
+    renderer_classes = [CustomJSONRenderer]
+    permission_classes = [IsProductAdmin | IsSuperUser]
+    queryset = Seller.objects.all()
 

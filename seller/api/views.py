@@ -8,9 +8,10 @@ from rest_framework.generics import get_object_or_404
 
 from ..models import State, Seller
 from admin_section.permissions import IsSupportAdmin, IsTechnicalAdmin
-from .serializers import RetrieveStateSerializer, CreateAndUpdateStateSerializer
+from .serializers import RetrieveStateSerializer, CreateAndUpdateStateSerializer, SellerSerializer
 from extensions.api_exceptions import SerializerException
 from extensions.renderers import CustomJSONRenderer
+from ..permissions import IsSeller
 
 
 class StateView(APIView):
@@ -38,18 +39,28 @@ class StateView(APIView):
             raise SerializerException(serializer.errors)
 
     def put(self, request, pk, *args, **kwargs):
-        instance = get_object_or_404(State, pk=pk)
-        serializer = CreateAndUpdateStateSerializer(instance=instance, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'Success': True}, status.HTTP_202_ACCEPTED)
+        # instance = get_object_or_404(State, pk=pk)
+        try:
+            instance = State.objects.get(pk=pk)
+        except State.DoesNotExist:
+            return Response({'error': 'State/city not found'}, status=404)
         else:
-            raise SerializerException(serializer.errors)
+            serializer = CreateAndUpdateStateSerializer(instance=instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'Success': True}, status.HTTP_202_ACCEPTED)
+            else:
+                raise SerializerException(serializer.errors)
 
     def delete(self, request, pk, *args, **kwargs):
-        instance = get_object_or_404(State, pk=pk)
-        instance.delete()
-        return Response({'Success': True}, status.HTTP_204_NO_CONTENT)
+        # instance = get_object_or_404(State, pk=pk)
+        try:
+            instance = State.objects.get(pk=pk)
+        except State.DoesNotExist:
+            return Response({'error': 'State/city not found'}, status=404)
+        else:
+            instance.delete()
+            return Response({'Success': True}, status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
         if self.request.method in SAFE_METHODS:
@@ -60,8 +71,50 @@ class StateView(APIView):
         return super(StateView, self).get_permissions()
 
 
+class SellerView(APIView):
+    renderer_classes = [CustomJSONRenderer]
 
+    def post(self, request):
+        serializer = SellerSerializer(data=request.data)
 
+        if serializer.is_valid():
+            serializer.validated_data['user'] = request.user
+            serializer.save()
+            return Response({'success': True}, status.HTTP_201_CREATED)
 
+        else:
+            raise SerializerException(serializer.errors)
 
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            instance = Seller.objects.get(pk=pk)
+        except Seller.DoesNotExist:
+            return Response({'error': f'Seller with id {pk} not found'}, status=404)
+
+        else:
+            serializer = SellerSerializer(instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'success': True}, status.HTTP_202_ACCEPTED)
+
+            else:
+                raise SerializerException(serializer.errors)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            instance = Seller.objects.get(pk=pk)
+        except Seller.DoesNotExist:
+            return Response({'error': f'Seller with id {pk} not found'}, status=404)
+
+        else:
+            instance.delete()
+            return Response({'success': True}, status.HTTP_204_NO_CONTENT)
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'DELETE']:
+            self.permission_classes = [IsSeller]
+        else:
+            self.permission_classes = [IsAuthenticated]
+
+        return super(SellerView,self).get_permissions()
 

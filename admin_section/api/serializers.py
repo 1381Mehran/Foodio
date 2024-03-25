@@ -8,6 +8,7 @@ from rest_framework.serializers import ValidationError
 
 from ..models import Admin
 from account.utils import Authentication
+from seller.models import Seller
 
 
 class ImprovePositionSerializer(serializers.Serializer):
@@ -108,3 +109,24 @@ class ChangeAdminOrStaffPasswordSerializer(serializers.Serializer):
 
         return obj
 
+
+# Relating to Sellers
+
+class SellerSerializer(serializers.Serializer):
+    id = serializers.PrimaryKeyRelatedField(queryset=Seller.objects.all())
+    user = serializers.StringRelatedField(read_only=True)
+    work_class = serializers.CharField(max_length=250)
+    work_class_number = serializers.CharField(max_length=30)
+    state = serializers.SerializerMethodField()
+    address = serializers.CharField(max_length=300)
+    is_active = serializers.BooleanField()
+
+    def get_state(self, obj):
+        return {
+            'id': obj.state.id,
+            'title': obj.state.title,
+            'parent': {
+                'id': obj.state.parent.id,
+                'title': obj.state.parent.title
+            }
+        }
