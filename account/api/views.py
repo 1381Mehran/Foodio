@@ -10,6 +10,15 @@ from extensions.api_exceptions import SerializerException
 
 
 class LoginView(APIView):
+
+    """
+    POST:
+        : login to site for jwt token
+
+        parameters: 1- phone(required), 2- password(Just for sellers or admins is required)
+
+    """
+
     serializer_class = AuthenticationSerializer
     renderer_classes = [CustomJSONRenderer]
 
@@ -33,6 +42,14 @@ class LoginView(APIView):
 
 
 class VerifyView(APIView):
+
+    """
+    POST:
+        : verify user by phone number and OTP code
+
+        parameters: 1- phone(required), 2- code(required)
+    """
+
     renderer_classes = [CustomJSONRenderer]
     serializer_class = AuthenticationSerializer
 
@@ -59,6 +76,13 @@ class VerifyView(APIView):
 
 
 class LogoutView(APIView):
+
+    """
+    POST:
+        : logout user
+    """
+
+
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsAuthenticated]
 
@@ -76,6 +100,22 @@ class LogoutView(APIView):
 
 
 class UserProfileView(APIView):
+
+    """
+    GET:
+        : get user profile
+
+    PUT:
+        : update user profile
+        parameters: 'first_name', 'last_name', 'email', 'national_id', 'image'
+
+
+    DELETE:
+          : delete user account
+
+    """
+
+
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
