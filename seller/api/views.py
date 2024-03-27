@@ -78,9 +78,17 @@ class SellerView(APIView):
         serializer = SellerSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.validated_data['user'] = request.user
-            serializer.save()
-            return Response({'success': True}, status.HTTP_201_CREATED)
+            if (request.user.first_name and request.user.last_name and request.user.national_id and
+                    (request.user.card_numbers.filter(is_active=True).count() > 0)):
+                serializer.validated_data['user'] = request.user
+                serializer.save()
+                return Response({'success': True}, status.HTTP_201_CREATED)
+
+            else:
+                return Response(
+                    {'error': 'first name , last name and national id are required and you have to have at least one card number'},
+                    status.HTTP_406_NOT_ACCEPTABLE
+                )
 
         else:
             raise SerializerException(serializer.errors)

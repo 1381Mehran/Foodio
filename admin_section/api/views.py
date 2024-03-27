@@ -7,9 +7,13 @@ from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 from product.models import Product
-from .serializers import (ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer)
+from .serializers import (
+    ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer, AcceptingSellerSerializer
+)
+
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSuperUser, IsAdminOrStaff, IsProductAdmin
 from ..models import Admin, Staff
@@ -116,5 +120,66 @@ class SellerListView(ListAPIView):
     serializer_class = SellerSerializer
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsProductAdmin | IsSuperUser]
-    queryset = Seller.objects.all()
+
+    def get_queryset(self):
+        queryset = Seller.objects.all()
+        status_ = self.request.query_params.get('status')
+
+        @unique
+        class Status(Enum):
+            ACTIVE = "active"
+            INACTIVE = "inactive"
+
+        match status_:
+            case Status.ACTIVE.value:
+                queryset = queryset.filter(is_active=True)
+
+            case Status.INACTIVE.value:
+                queryset = queryset.filter(is_active=False)
+
+        return queryset
+
+
+class SellerAcceptanceView(APIView):
+    permission_classes = [IsAuthenticated & IsProductAdmin]
+    renderer_classes = [CustomJSONRenderer]
+    serializer_class = AcceptingSellerSerializer
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            instance = Seller.objects.get(id=pk)
+        except Seller.DoesNotExist:
+            return Response({'error': f'Seller with id {pk} does not found.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            serializer = self.serializer_class(instance=instance, data=request.data, partial=True)
+            if serializer.is_valid():
+
+                serializer.save()
+
+                if serializer.validated_data.get("is_active"):
+
+                    password = Authentication().password_generator
+                    instance.not_confirmed_cause = None
+                    instance.user.password = password
+                    instance.user.save(update_fields=['password'])
+                    instance.save(update_fields=["not_confirmed_cause"])
+
+                    return Response(
+                        {
+                            'phone': instance.user.phone,
+                            'password': password
+                        },
+                        status=status.HTTP_200_OK
+                    )
+
+                else:
+                    return Response({'Success': True})
+
+            else:
+                raise SerializerException(serializer.errors)
+
+
+
+
+
 

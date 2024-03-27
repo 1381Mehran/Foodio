@@ -130,3 +130,21 @@ class SellerSerializer(serializers.Serializer):
                 'title': obj.state.parent.title
             }
         }
+
+
+class AcceptingSellerSerializer(serializers.ModelSerializer):
+
+    def validate(self, attrs):
+        if attrs.get('is_active') is False and attrs.get('not_confirmed_cause') is None:
+            raise ValidationError('not_confirmed_cause is required')
+
+        return attrs
+
+    class Meta:
+        model = Seller
+        fields = ('is_active', 'not_confirmed_cause')
+        extra_kwargs = {
+            'not_confirmed_cause': {'required': False}
+        }
+
+

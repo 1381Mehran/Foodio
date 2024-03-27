@@ -95,8 +95,7 @@ class CardNumber(models.Model):
         _('Card Number'),
         max_length=16,
         unique=True,
-        blank=True,
-        null=True
+
     )
 
     sheba_number = models.CharField(

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from extensions.renderers import CustomJSONRenderer
 from ..utils import Authentication
-from .serializers import AuthenticationSerializer
+from .serializers import AuthenticationSerializer, UserProfileSerializer
 from extensions.api_exceptions import SerializerException
 
 
@@ -73,5 +73,35 @@ class LogoutView(APIView):
 
         else:
             return Response({'error': result}, status=status.HTTP_403_FORBIDDEN)
+
+
+class UserProfileView(APIView):
+    renderer_classes = [CustomJSONRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get(self, request):
+        serializer = self.serializer_class(instance=request.user, context={'request': request})
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = self.serializer_class(data=request.data, instance=request.user, partial=True)
+        if serializer.is_valid():
+            for field in ['first_name', 'last_name', 'email', 'national_id', 'image']:
+                if serializer.validated_data.get(field, None):
+                    setattr(request.user, field, serializer.validated_data.get(field))
+                    request.user.save(update_fields=[field])
+
+            return Response({'success': True}, status.HTTP_202_ACCEPTED)
+
+        else:
+            raise SerializerException(serializer.errors)
+
+    def delete(self, request):
+        request.user.delete()
+        return Response({'success': True}, status.HTTP_204_NO_CONTENT)
+
+
+
 
 

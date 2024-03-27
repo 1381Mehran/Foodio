@@ -33,6 +33,12 @@ class State(models.Model):
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
 
+    def __str__(self):
+        if self.type == 'city':
+            return f'{self.parent.title}-{self.title}'
+        else:
+            return f'{self.title}'
+
     class Meta:
         db_table = 'states'
         verbose_name = _('state')
@@ -70,6 +76,8 @@ class Seller(models.Model):
         max_length=300,
         help_text=_('Enter your work address')
     )
+
+    not_confirmed_cause = models.TextField(_('not_confirmed_cause'), null=True, blank=True)
 
     is_active = models.BooleanField(_('is active'), default=False)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)

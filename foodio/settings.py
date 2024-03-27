@@ -140,6 +140,8 @@ AUTH_USER_MODEL = 'account.User'
 OTP_SIZE = 6  # OTP length
 OTP_EXPIRATION = 2  # minutes
 
+KAVENEGAR_API_KEY = os.getenv('KAVENEGAR_API_KEY')
+
 # Relating to Pagination
 
 PAGE_SIZE = 5

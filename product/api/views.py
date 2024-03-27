@@ -124,3 +124,6 @@ class CatView(APIView):
 
         else:
             return Response({'error': 'Type is required'}, status=400)
+
+
+
