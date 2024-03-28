@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
+
+from account.models import CardNumber
 from extensions.custom_serializer_fields import AbsoluteURLImageField
 
 
@@ -57,3 +59,10 @@ class UserProfileSerializer(serializers.Serializer):
 
         return attrs
 
+
+class UserCardNumberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CardNumber
+        fields = ('id', 'card_number', 'sheba_number', 'is_active')
+        extra_kwargs = {'id': {'read_only': True}}
