@@ -17,7 +17,7 @@ class AdminSchema(models.Model):
 
     position = models.CharField(_('Position'),
                                 max_length=10,
-                                choices=AdminPosition,
+                                choices=AdminPosition.choices,
                                 default=None
                                 )
 
