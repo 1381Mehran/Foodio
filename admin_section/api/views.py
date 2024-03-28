@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
-from rest_framework import status
+from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
@@ -120,6 +120,8 @@ class SellerListView(ListAPIView):
     serializer_class = SellerSerializer
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsProductAdmin | IsSuperUser]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['user__phone', 'user__first_name', 'user__last_name']
 
     def get_queryset(self):
         queryset = Seller.objects.all()

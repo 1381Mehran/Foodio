@@ -42,7 +42,7 @@ class UserProfileSerializer(serializers.Serializer):
     #         return request.build_absolute_uri(obj.image.url)
 
     def get_card_numbers(self, instance):
-        return [{'card_number': card.card_number, 'sheba_number': card.sheba_number}
+        return [{'card_number': card.card_number, 'sheba_number': card.sheba_number, 'is_active': card.is_active}
                 for card in instance.card_numbers.all()]
 
     # def to_representation(self, instance):

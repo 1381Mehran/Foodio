@@ -115,6 +115,7 @@ class ChangeAdminOrStaffPasswordSerializer(serializers.Serializer):
 class SellerSerializer(serializers.Serializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Seller.objects.all())
     user = serializers.StringRelatedField(read_only=True)
+    phone = serializers.SerializerMethodField()
     work_class = serializers.CharField(max_length=250)
     work_class_number = serializers.CharField(max_length=30)
     state = serializers.SerializerMethodField()
@@ -130,6 +131,9 @@ class SellerSerializer(serializers.Serializer):
                 'title': obj.state.parent.title
             }
         }
+
+    def get_phone(self, obj):
+        return obj.user.phone
 
 
 class AcceptingSellerSerializer(serializers.ModelSerializer):
