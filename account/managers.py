@@ -1,4 +1,5 @@
 from django.contrib.auth.models import UserManager
+from django.contrib.auth import get_user_model
 
 
 class CustomUserManager(UserManager):
@@ -6,10 +7,12 @@ class CustomUserManager(UserManager):
         if not phone:
             raise ValueError('phone is required')
 
-        user = self.model(phone=phone)
+        user = get_user_model().objects.create(
+            phone=phone,
+            email=email,
+            password=password
+        )
 
-        user.set_password(password)
-        user.save(using=self._db)
         return user
 
     def create_superuser(self, phone, email=None, password=None, **extra_fields):
@@ -22,6 +25,6 @@ class CustomUserManager(UserManager):
         user.is_staff = True
         user.is_superuser = True
 
-        user.save(using=self._db)
+        user.save(update_fields=['is_staff', 'is_superuser'])
 
         return user
