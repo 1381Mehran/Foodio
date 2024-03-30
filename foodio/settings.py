@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'admin_section.apps.AdminSectionConfig',
     'product.apps.ProductConfig',
     'seller.apps.SellerConfig',
+    'foodio_info.apps.FoodioInfoConfig',
 
 ]
 
