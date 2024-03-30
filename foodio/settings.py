@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = os.getenv('DEBUG', default=False)
+DEBUG = int(os.getenv('DEBUG', default=False))
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
@@ -73,7 +73,7 @@ WSGI_APPLICATION = 'foodio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-POSTGRES_STATUS = os.getenv('POSTGRES_STATUS', None)
+POSTGRES_STATUS = os.getenv('POSTGRES_STATUS', default=False)
 
 if bool(int(POSTGRES_STATUS)):
     DATABASES = {
