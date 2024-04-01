@@ -1,0 +1,35 @@
+# .dockerignore file for Django project
+
+# Ignore log files
+*.log
+
+# Ignore Django and Python cache files
+__pycache__
+local_settings.py
+*.pyc
+
+/.venv
+
+
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+
+# Ignore Docker-related files
+.docker/
+Dockerfile
+docker-compose.yml
+
+# Ignore other files and directories that should not be included in the Docker image
+*.swp
+*.swo
+*.git/
+*.hg/
+*.bzr/
+*.backup/
+*.orig/
+*.rej
+Thumbs.db
+db.sqlite3
+

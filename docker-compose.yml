@@ -3,25 +3,30 @@ version: '3.9'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+
     container_name: foodio
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+
+    command: python manage.py runserver 0.0.0.0:8000
 
     ports:
       - '8000:8000'
 
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres
-
+    restart: always
     container_name: foodio-db
 
     ports:
-      - 5432:5432
+      - '5432:5432'
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -31,8 +36,28 @@ services:
       POSTGRES_DB: foodio_db
       POSTGRES_USER: postgres
 
+  redis:
+    image: redis:7.2.4-alpine
+    restart: always
+    container_name: foodio-redis
+
+    ports:
+      - '6379:6379'
+
+  celery:
+    container_name: foodio-celery
+
+    build:
+      context: .
+
+    command: celery -A foodio worker -l INFO
+
+    volumes:
+      - .:/app
+
+    depends_on:
+      - app
+      - redis
 
 volumes:
   postgres_data:
-
-
