@@ -15,6 +15,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
 
+# ensure Python output is sent directly to the terminal without buffering
+
 ENV PYTHONNUNBUFFERED 1
+
+# prevent python from writing .pyc files
+
+ENV PYTHONDONTWRITEBYTECODE 1
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -44,6 +44,12 @@ services:
     ports:
       - '6379:6379'
 
+  rabbit-mq:
+    image: rabbitmq:3.13.1-management-alpine
+    container_name: foodio-pyamqp
+    ports:
+      - '5672:5672'
+
   celery:
     container_name: foodio-celery
 
@@ -58,6 +64,24 @@ services:
     depends_on:
       - app
       - redis
+
+#  celery_2:
+#    container_name: foodio-celery-2
+#    build:
+#      context: ./CW_1
+#      dockerfile: Dockerfile
+#
+#    command: celery -A celerytask worker -l INFO
+#
+#    volumes:
+#      - ./CW_1:/celery
+#
+#    environment:
+#      CELERY_BROKER_URL: redis://redis:6379/0
+#      CELERY_RESULT_BACKEND: redis://redis:6379/0
+#
+#    depends_on:
+#      - redis
 
 volumes:
   postgres_data:

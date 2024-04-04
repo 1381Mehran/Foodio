@@ -10,7 +10,7 @@ local_settings.py
 
 /.venv
 
-
+/CW_1
 
 # Ignore IDE-specific files
 .idea/
