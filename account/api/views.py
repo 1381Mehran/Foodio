@@ -3,6 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 from extensions.renderers import CustomJSONRenderer
 from ..models import CardNumber
 from ..utils import Authentication
@@ -23,6 +26,36 @@ class LoginView(APIView):
     serializer_class = AuthenticationSerializer
     renderer_classes = [CustomJSONRenderer]
 
+    @swagger_auto_schema(
+        operation_summary="login",
+        operation_description="get OTP code to login to site",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                'password': openapi.Schema(type=openapi.TYPE_STRING)
+            },
+            required=['phone']
+        ),
+        responses={
+            status.HTTP_200_OK: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'code': openapi.Schema(type=openapi.TYPE_STRING)
+                },
+                description='get OTP code to login to'
+            ),
+            status.HTTP_201_CREATED: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'code': openapi.Schema(type=openapi.TYPE_STRING)
+                },
+                description='get OTP code to login'
+            ),
+            status.HTTP_400_BAD_REQUEST: "problem"
+        }
+
+    )
     def post(self, request):
         authentication = Authentication()
         serializer = self.serializer_class(data=request.data)
@@ -54,6 +87,28 @@ class VerifyView(APIView):
     renderer_classes = [CustomJSONRenderer]
     serializer_class = AuthenticationSerializer
 
+    @swagger_auto_schema(
+        operation_summary="Verify",
+        operation_description='get refresh token and access token',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'phone': openapi.Schema(type=openapi.TYPE_STRING),
+                'code': openapi.Schema(type=openapi.TYPE_STRING)
+            },
+            required=['phone', 'code']
+        ),
+        responses={
+            status.HTTP_200_OK: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'access': openapi.Schema(type=openapi.TYPE_STRING),
+                    'refresh': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            ),
+            status.HTTP_400_BAD_REQUEST: 'problem'
+        }
+    )
     def post(self, request):
         authentication = Authentication()
         serializer = self.serializer_class(data=request.data)
