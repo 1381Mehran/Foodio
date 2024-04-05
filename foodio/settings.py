@@ -1,7 +1,10 @@
 from datetime import timedelta
 from pathlib import Path
 import os
+import logging.config
+
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -211,8 +214,46 @@ SWAGGER_SETTINGS = {
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = 'Asia/Tehran'
-BROKER_CONNECTION_RETRY = True
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
+
+CELERY_WORKER_LOG_FILE = os.path.join(BASE_DIR, 'logs', 'CELERY_WORKER.log')
+CELERY_BEAT_LOG_FILE = os.path.join(BASE_DIR, 'logs', 'CELERY_BEAT.log')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'handlers': {
+        'worker_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': CELERY_WORKER_LOG_FILE
+        },
+        'beat_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': CELERY_BEAT_LOG_FILE
+        }
+    },
+
+    'loggers': {
+        'celery.worker': {
+            'handlers': ['worker_file'],
+            'level': 'INFO',
+            'propagate': True
+        },
+
+        'celery.beat': {
+            'handlers': ['beat_file'],
+            'level': 'INFO',
+            'propagate': True
+        }
+
+    }
+
+
+}
+
 

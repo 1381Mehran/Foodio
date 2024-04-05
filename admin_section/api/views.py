@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIView
 from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -22,10 +22,16 @@ from extensions.api_exceptions import SerializerException
 from seller.models import Seller
 
 
-class ImprovePositionView(CreateAPIView):
+class ImprovePositionView(ListCreateAPIView):
     serializer_class = ImprovePositionSerializer
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsAuthenticated, IsSuperUser]
+
+    def list(self, request, *args, **kwargs):
+        options = [Admin.AdminPosition.FINANCIAL, Admin.AdminPosition.TECHNICAL,
+                   Admin.AdminPosition.PRODUCT, Admin.AdminPosition.SUPPORT]
+
+        return Response({'options': options})
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

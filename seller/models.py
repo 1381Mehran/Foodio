@@ -78,9 +78,16 @@ class Seller(models.Model):
     )
 
     not_confirmed_cause = models.TextField(_('not_confirmed_cause'), null=True, blank=True)
+    celery_task_id = models.CharField(_('celery_task_id'), max_length=255, null=True, blank=True)
 
     is_active = models.BooleanField(_('is active'), default=False)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, editable=False)
+
+    def __str__(self):
+        if self.user.first_name and self.user.last_name:
+            return f'{self.user.first_name} {self.user.last_name}'
+        else:
+            return self.user.phone
 
     class Meta:
         db_table = 'Sellers'

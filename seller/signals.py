@@ -12,4 +12,6 @@ def seller_active_checker(sender, instance, created, **kwargs):
 
     if created:
 
-        check_seller_active.apply_async(args=(instance.id,), eta=instance.created_at + timedelta(minutes=30))
+        task = check_seller_active.apply_async(args=(instance.id,), eta=instance.created_at + timedelta(minutes=30))
+        instance.task_id = task.id
+        instance.save(update_fields=['task_id'])
