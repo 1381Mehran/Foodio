@@ -111,7 +111,8 @@ class CardNumber(models.Model):
     )
     created_at = models.DateTimeField(
         _('Created at'),
-        auto_now_add=True
+        auto_now_add=True,
+        editable=False
     )
 
     class Meta:
@@ -133,7 +134,8 @@ class UserWallet(models.Model):
     )
     created_at = models.DateTimeField(
         _('Created at'),
-        auto_now_add=True
+        auto_now_add=True,
+        editable=False
     )
 
     class Meta:

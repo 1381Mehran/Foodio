@@ -21,7 +21,8 @@ class ProductCategorySchema(models.Model):
     )
     created_at = models.DateTimeField(
         _('created at'),
-        auto_now_add=True
+        auto_now_add=True,
+        editable=False
     )
 
     class Meta:
@@ -96,7 +97,7 @@ class Product(models.Model):
         default=False
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'), editable=False)
 
     class Meta:
         db_table = 'Products'
@@ -132,7 +133,7 @@ class ProductImage(models.Model):
         default=False
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'), editable=False)
 
     class Meta:
         db_table = 'product_images'
@@ -170,7 +171,7 @@ class ProductProperty(models.Model):
         default=False
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'), editable=False)
 
     class Meta:
         db_table = 'Product_properties'

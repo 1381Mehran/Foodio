@@ -21,7 +21,7 @@ class AdminSchema(models.Model):
                                 default=None
                                 )
 
-    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True, editable=False)
     is_active = models.BooleanField(_('Active'), default=True)
 
     class Meta:

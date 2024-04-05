@@ -46,9 +46,9 @@ class CreateAndUpdateStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
         fields = ('title', 'type', 'parent')
-        # extra_kwargs = {
-        #     'parent': {'required': False}
-        # }
+        extra_kwargs = {
+            'type': {'required': True}
+        }
 
     # def validate_type(self, obj):
     #     if obj not in ['city', 'state']:

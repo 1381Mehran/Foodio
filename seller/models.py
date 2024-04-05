@@ -31,7 +31,7 @@ class State(models.Model):
 
     is_active = models.BooleanField(_('is active'), default=True)
 
-    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True, editable=False)
 
     def __str__(self):
         if self.type == 'city':
@@ -80,7 +80,7 @@ class Seller(models.Model):
     not_confirmed_cause = models.TextField(_('not_confirmed_cause'), null=True, blank=True)
 
     is_active = models.BooleanField(_('is active'), default=False)
-    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True, editable=False)
 
     class Meta:
         db_table = 'Sellers'

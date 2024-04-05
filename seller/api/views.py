@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.generics import get_object_or_404
 
 from ..models import State, Seller
-from admin_section.permissions import IsSupportAdmin, IsTechnicalAdmin
+from admin_section.permissions import IsSupportAdmin, IsTechnicalAdmin, IsSuperUser
 from .serializers import RetrieveStateSerializer, CreateAndUpdateStateSerializer, SellerSerializer
 from extensions.api_exceptions import SerializerException
 from extensions.renderers import CustomJSONRenderer
@@ -66,7 +66,7 @@ class StateView(APIView):
         if self.request.method in SAFE_METHODS:
             self.permission_classes = [IsAuthenticated]
         else:
-            self.permission_classes = [IsSupportAdmin | IsTechnicalAdmin]
+            self.permission_classes = [IsSuperUser | IsSupportAdmin | IsTechnicalAdmin]
 
         return super(StateView, self).get_permissions()
 
