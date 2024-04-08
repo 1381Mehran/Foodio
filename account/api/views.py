@@ -32,8 +32,20 @@ class LoginView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                'password': openapi.Schema(type=openapi.TYPE_STRING)
+                'phone': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    minLength=10,
+                    maxLength=10,
+                    description='Phone number',
+                    example='9371111111'
+                ),
+                'password': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    minLength=8,
+                    maxLength=20,
+                    description='Enter your password',
+                    example='<PASSWORD>'
+                )
             },
             required=['phone']
         ),
@@ -52,7 +64,8 @@ class LoginView(APIView):
                 },
                 description='get OTP code to login'
             ),
-            status.HTTP_400_BAD_REQUEST: "problem"
+            status.HTTP_406_NOT_ACCEPTABLE: "Invalid phone or password",
+            status.HTTP_400_BAD_REQUEST: "Serializer Problem"
         }
 
     )
@@ -93,8 +106,20 @@ class VerifyView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                'code': openapi.Schema(type=openapi.TYPE_STRING)
+                'phone': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    minLength=10,
+                    maxLength=10,
+                    description='Phone number',
+                    example='9371111111'
+                ),
+                'code': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    minLength=6,
+                    maxLength=6,
+                    description='OTP code',
+                    example='<OTP CODE>'
+                )
             },
             required=['phone', 'code']
         ),
@@ -133,15 +158,25 @@ class VerifyView(APIView):
 
 class LogoutView(APIView):
 
-    """
-    POST:
-        : logout user
-    """
-
-
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="logout",
+        operation_description="logout user",
+        responses={
+            status.HTTP_204_NO_CONTENT: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={'massage': openapi.Schema(type=openapi.TYPE_STRING)},
+            ),
+            status.HTTP_403_FORBIDDEN:openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'error': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )
+        }
+    )
     def post(self, request):
 
         authentication = Authentication()
@@ -157,28 +192,31 @@ class LogoutView(APIView):
 
 class UserProfileView(APIView):
 
-    """
-    GET:
-        : get user profile
-
-    PUT:
-        : update user profile
-        parameters: 'first_name', 'last_name', 'email', 'national_id', 'image'
-
-
-    DELETE:
-          : delete user account
-
-    """
-
     renderer_classes = [CustomJSONRenderer]
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
 
+    @swagger_auto_schema(
+        operation_summary="profile_info",
+        operation_description="get user profile information",
+        responses={
+            status.HTTP_200_OK: UserProfileSerializer(),
+        },
+        security=[{'Bearer': []}]
+    )
     def get(self, request):
         serializer = self.serializer_class(instance=request.user, context={'request': request})
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="profile_edit",
+        operation_description="edit user profile",
+        request_body=UserProfileSerializer,
+        responses={
+            status.HTTP_200_OK: '{"success": True}',
+            status.HTTP_400_BAD_REQUEST: "Bad Request",
+        }
+    )
     def put(self, request):
         serializer = self.serializer_class(data=request.data, instance=request.user, partial=True)
         if serializer.is_valid():
@@ -192,6 +230,13 @@ class UserProfileView(APIView):
         else:
             raise SerializerException(serializer.errors)
 
+    @swagger_auto_schema(
+        operation_summary="profile_delete",
+        operation_description="delete user Account - just must be authenticated",
+        responses={
+            status.HTTP_204_NO_CONTENT: '{"success": True}',
+        }
+    )
     def delete(self, request):
         request.user.delete()
         return Response({'success': True}, status.HTTP_204_NO_CONTENT)
@@ -200,27 +245,48 @@ class UserProfileView(APIView):
 class UserCardNumberView(APIView):
 
     """
-    GET:
-        : Get user card number list
+        get:
+             Get user card number list
 
-    POST:
-         : Create user card number
+        post:
+              Create user card number
 
-         body => 1- card_number(required), 2- sheba_number(optional)
+             request_body = {card_number: string, sheba_number: string}
+             required = ['card_number']
+             response_body
 
-    PUT:
-         : update user card number
-         body => 1- card_number, 2- sheba_number, 3- is_active
+        put:
+             update user card number
+             request_body = {card_number: string, sheba_number: string, is_active: boolean}
+             required = ['card_number', 'sheba_number']
 
-    DELETE:
-            : Delete user card number
-            kwargs => pk -> card_number instance_id
+
+        delete:
+                : Delete user card number
+                kwargs => pk -> card_number instance_id
     """
 
     permission_classes = [IsAuthenticated]
     renderer_classes = [CustomJSONRenderer]
     serializer_class = UserCardNumberSerializer
 
+    @swagger_auto_schema(
+        operation_summary='user card number',
+        operation_description='get user card number',
+        manual_parameters=[
+            openapi.Parameter(
+                name='id',
+                in_=openapi.IN_QUERY,
+                description='dont enter id in this webservice',
+                type=openapi.TYPE_INTEGER,
+                required=False
+            )
+        ],
+        responses={
+            status.HTTP_200_OK: UserCardNumberSerializer(many=True)
+        },
+        security=[{'Bearer': []}]
+    )
     def get(self, request):
         serializer = self.serializer_class(instance=request.user.card_numbers.all(), many=True)
         return Response(serializer.data)

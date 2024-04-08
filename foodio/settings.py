@@ -203,12 +203,13 @@ SIMPLE_JWT = {
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        "Auth Token eg [Bearer {JWT}]": {
+        "Bearer": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
         }
-    }
+    },
+    'USE_SESSION_AUTH': False,
 }
 
 # Relating to Celery

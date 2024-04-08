@@ -6,12 +6,22 @@ WORKDIR /app
 # Install bash
 RUN apk add --no-cache bash
 
-# Copy files
-COPY . .
+# activate virtual Environment
+COPY venv.sh /app
+
+RUN chmod +x venv.sh
 
 RUN ./venv.sh
 
+# Copy requirements.txt file
+
+COPY requirements.txt /app
+
 RUN pip install --no-cache-dir -r requirements.txt
+
+# copy rest remaining files
+
+COPY . .
 
 EXPOSE 8000
 
