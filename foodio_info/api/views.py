@@ -50,7 +50,7 @@ class LogsView(APIView):
     permission_classes = [IsAuthenticated & IsSuperUser]
 
     @swagger_auto_schema(
-        operation_summary='Error logs',
+        operation_summary='system logs',
         responses={
             status.HTTP_200_OK: openapi.Schema(type=openapi.TYPE_STRING)
         },
@@ -81,7 +81,7 @@ class CeleryWorkerLogsView(APIView):
     permission_classes = [IsAuthenticated & IsSuperUser]
 
     @swagger_auto_schema(
-        operation_summary='Error logs',
+        operation_summary='Celery Logs',
         responses={
             status.HTTP_200_OK: openapi.Schema(type=openapi.TYPE_STRING)
         },
@@ -89,4 +89,4 @@ class CeleryWorkerLogsView(APIView):
     )
     def get(self, request):
         with open(f'{settings.BASE_DIR}/logs/CELERY_WORKER.log', 'r') as f:
-            return Response({'logs': f.readlines()[50:]})
+            return Response({'logs': f.readlines()[-50:]})

@@ -9,11 +9,12 @@ from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from foodio.celery import app as celery_app
+
 from product.models import Product
 from .serializers import (
     ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer, AcceptingSellerSerializer
 )
-
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSuperUser, IsAdminOrStaff, IsProductAdmin
 from ..models import Admin, Staff
@@ -164,13 +165,18 @@ class SellerAcceptanceView(APIView):
 
                 serializer.save()
 
+                task = celery_app.AsyncResult(instance.celery_task_id)
+                task.revoke(terminate=True)
+                instance.celery_task_id = None
+                instance.save(update_fields=['celery_task_id'])
+
                 if serializer.validated_data.get("is_active"):
 
                     password = Authentication().password_generator
                     instance.not_confirmed_cause = None
                     instance.user.password = password
                     instance.user.save(update_fields=['password'])
-                    instance.save(update_fields=["not_confirmed_cause"])
+                    instance.save(update_fields=["not_confirmed_cause", "celery_task_id"])
 
                     return Response(
                         {
@@ -178,7 +184,7 @@ class SellerAcceptanceView(APIView):
                             'password': password
                         },
                         status=status.HTTP_200_OK
-                    )
+                        )
 
                 else:
                     return Response({'Success': True})
