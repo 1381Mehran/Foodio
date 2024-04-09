@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import check_password
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from extensions.loggers import logger_error
+
 
 class Authentication:
     size = settings.OTP_SIZE
@@ -52,7 +54,17 @@ class Authentication:
 
         return status, errors
 
-    def login(self, phone: str, password: str = None, *args, **kwargs) -> str:
+    def login(self, phone: str, password: str = None, *args, **kwargs) -> str | dict:
+
+        if cache.get(phone):
+            logger_error.error(f'existing OTP code - expiration time : {cache.ttl(phone)}')
+            logger_error.error(locals())
+
+            return {
+                'Message': 'We sent an OTP code, please be patient',
+                'Time left until expiration': f'{cache.ttl(phone)} seconds'
+            }
+
         if password:
             try:
                 user = get_user_model().objects.get(phone=phone)

@@ -8,6 +8,11 @@ app = Celery('foodio')
 app.conf.update(
     broker_connection_retry_on_startup=True
 )
+#
+# app.conf.task_routes = {
+#     'seller.tasks.check_seller_active': {'queue': 'queue1'},
+#     'seller.tasks.check_seller_active2': {'queue': 'queue2'},
+# }
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 

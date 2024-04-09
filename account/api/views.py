@@ -79,7 +79,7 @@ class LoginView(APIView):
 
             result = authentication.login(phone, password)
 
-            if len(result) == 6:
+            if isinstance(result, str) and result.isnumeric():
                 return Response({"otp": f"{result}"}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': result}, status=status.HTTP_406_NOT_ACCEPTABLE)
