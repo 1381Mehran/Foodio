@@ -1,6 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from datetime import datetime
+
+from account.models import User
 
 
 #######################################
@@ -15,9 +16,9 @@ class ProductCategorySchema(models.Model):
         max_length=100,
     )
 
-    active = models.BooleanField(
-        _('active'),
-        default=True
+    is_active = models.BooleanField(
+        _('is active'),
+        default=False
     )
     created_at = models.DateTimeField(
         _('created at'),
@@ -75,6 +76,13 @@ class SubCat(ProductCategorySchema):
 #######################################
 
 class Product(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name=_('User'),
+        related_name='products',
+    )
+
     title = models.CharField(
         _('title')
         , max_length=450
@@ -88,6 +96,13 @@ class Product(models.Model):
 
     introduce = models.TextField(
         _('introduce'),
+        null=True,
+        blank=True
+    )
+
+    celery_task_id = models.CharField(
+        verbose_name=_('celery_task_id'),
+        max_length=256,
         null=True,
         blank=True
     )

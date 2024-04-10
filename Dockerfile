@@ -11,7 +11,7 @@ COPY venv.sh /app
 
 RUN chmod +x venv.sh
 
-RUN ./venv.sh
+RUN source ./venv.sh
 
 # Copy requirements.txt file
 

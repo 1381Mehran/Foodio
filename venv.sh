@@ -2,7 +2,9 @@
 
 ENV_NAME=venv
 
-python3 -m venv $ENV_NAME
+ls /app
+
+python3 -m venv /app/$ENV_NAME
 
 cd $ENV_NAME/bin
 
