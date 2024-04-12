@@ -165,10 +165,12 @@ class SellerAcceptanceView(APIView):
 
                 serializer.save()
 
-                task = celery_app.AsyncResult(instance.celery_task_id)
-                task.revoke(terminate=True)
-                instance.celery_task_id = None
-                instance.save(update_fields=['celery_task_id'])
+                if instance.celery_task_id:
+
+                    task = celery_app.AsyncResult(instance.celery_task_id)
+                    task.revoke(terminate=True)
+                    instance.celery_task_id = None
+                    instance.save(update_fields=['celery_task_id'])
 
                 if serializer.validated_data.get("is_active"):
 
