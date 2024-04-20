@@ -7,7 +7,10 @@ services:
       context: .
       dockerfile: Dockerfile
 
+    restart: always
+
     container_name: foodio
+
     volumes:
       - .:/app
 
@@ -16,9 +19,14 @@ services:
     ports:
       - '8000:8000'
 
+    environment:
+      - GITLAB_URL = http://gitlab.foodio:80
+      - GIT_STRATEGY = fetch
+
     depends_on:
       - db
       - redis
+      - gitlab
 
   db:
     image: postgres
@@ -82,6 +90,25 @@ services:
 #
 #    depends_on:
 #      - redis
+
+  gitlab:
+    image: gitlab/gitlab-ee
+    restart: always
+    hostname: gitlab
+    container_name: foodio-gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG:
+        external_url 'http://gitlab.foodio'
+        gitlab_rails['gitlab_shell_ssh_port'] = 22
+    ports:
+      - "22:22"
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      - ./gitlab/config:/etc/gitlab
+      - ./gitlab/logs:/var/log/gitlab
+      - ./gitlab/data:/var/opt/gitlab
 
 volumes:
   postgres_data:
