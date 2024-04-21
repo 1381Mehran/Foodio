@@ -73,23 +73,6 @@ services:
       - app
       - redis
 
-#  celery_2:
-#    container_name: foodio-celery-2
-#    build:
-#      context: ./CW_1
-#      dockerfile: Dockerfile
-#
-#    command: celery -A celerytask worker -l INFO
-#
-#    volumes:
-#      - ./CW_1:/celery
-#
-#    environment:
-#      CELERY_BROKER_URL: redis://redis:6379/0
-#      CELERY_RESULT_BACKEND: redis://redis:6379/0
-#
-#    depends_on:
-#      - redis
 
   gitlab:
     image: gitlab/gitlab-ee
@@ -109,6 +92,10 @@ services:
       - ./gitlab/config:/etc/gitlab
       - ./gitlab/logs:/var/log/gitlab
       - ./gitlab/data:/var/opt/gitlab
+
+    depends_on:
+      - redis
+      - db
 
 volumes:
   postgres_data:
