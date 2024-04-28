@@ -234,11 +234,11 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': CELERY_WORKER_LOG_FILE
         },
-        'beat_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': CELERY_BEAT_LOG_FILE
-        }
+        # 'beat_file': {
+        #     'level': 'INFO',
+        #     'class': 'logging.FileHandler',
+        #     'filename': CELERY_BEAT_LOG_FILE
+        # }
     },
 
     'loggers': {
@@ -248,11 +248,11 @@ LOGGING = {
             'propagate': True
         },
 
-        'celery.beat': {
-            'handlers': ['beat_file'],
-            'level': 'INFO',
-            'propagate': True
-        }
+        # 'celery.beat': {
+        #     'handlers': ['beat_file'],
+        #     'level': 'INFO',
+        #     'propagate': True
+        # }
 
     }
 
