@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -7,6 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from extensions.renderers import CustomJSONRenderer
+from extensions.send_mail import SendMailThread
 from ..models import CardNumber
 from ..utils import Authentication
 from .serializers import AuthenticationSerializer, UserProfileSerializer, UserCardNumberSerializer
@@ -147,6 +150,16 @@ class VerifyView(APIView):
                 if status_:
                     return Response(result, status.HTTP_201_CREATED)
                 else:
+
+                    if (get_user_model().objects.filter(phone=phone).exists() and
+                            get_user_model().objects.get(phone=phone).email):
+
+                        SendMailThread(
+                            'شرکت جاوید',
+                            f'کد ورود شما : {result}',
+                            get_user_model().objects.get(phone=phone).email,
+                        )
+
                     return Response(result)
 
             else:
