@@ -175,4 +175,5 @@ cython_debug/
 
 /postgres_data
 
+gitlab/
 # End of https://www.toptal.com/developers/gitignore/api/django
