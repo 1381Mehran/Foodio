@@ -4,7 +4,7 @@ FROM python:3.12.3-slim-bookworm
 WORKDIR /app
 
 # Install bash
-RUN apk add --no-cache bash
+#RUN apk add --no-cache bash
 
 # activate virtual Environment
 COPY venv.sh /app
