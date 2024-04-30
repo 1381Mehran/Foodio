@@ -79,10 +79,10 @@ services:
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
+    container_name: 'foodio-gitlab'
     ports:
       - '80:80'
       - '443:443'
-      - '22:22'
     volumes:
       - '/srv/gitlab/config:/etc/gitlab'
       - '/srv/gitlab/data:/var/opt/gitlab'
