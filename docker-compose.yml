@@ -88,5 +88,19 @@ services:
       - '/srv/gitlab/data:/var/opt/gitlab'
       - '/srv/gitlab/logs:/var/log/gitlab'
 
+  registry:
+    image: 'gitlab/gitlab-ce:latest'
+    container_name: foodio-registry
+    ports:
+      - '5050:5050'
+    volumes:
+      - './registry/data:/var/lib/registry'
+    environment:
+      GITLAB_REGISTRY_HOST: registry.gitlab.example.com
+      GITLAB_REGISTRY_HTTP_SECRET: "${REGISTRY_HTTP_SECRET}"
+      GITLAB_REGISTRY_HTTP_KEY: "${REGISTRY_HTTP_KEY}"
+    depends_on:
+      - gitlab
+
 volumes:
   postgres_data:
