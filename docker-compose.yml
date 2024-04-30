@@ -87,6 +87,13 @@ services:
       - '/srv/gitlab/config:/etc/gitlab'
       - '/srv/gitlab/data:/var/opt/gitlab'
       - '/srv/gitlab/logs:/var/log/gitlab'
+    environment:
+      GITLAB_REGISTRY_HOST: registry.gitlab.foodio.com
+      GITLAB_REGISTRY_HTTP_SECRET: "0e72e1e4ed14503ef5aec1f9e83d45cc9a1899d13c017bfa4e8685315962e8df"
+      GITLAB_REGISTRY_HTTP_KEY: "efd7362ad246a80d6b22017cc715c251a7edf34652a0618dc6f0cbc21dd7290c"
+#    registry_nginx:
+#      ssl_certificate: /etc/gitlab/ssl/gitlab-registry.crt
+#      ssl_certificate_key: /etc/gitlab/ssl/gitlab-registry.key
 
   registry:
     image: 'gitlab/gitlab-ce:latest'
@@ -95,10 +102,6 @@ services:
       - '5050:5050'
     volumes:
       - './registry/data:/var/lib/registry'
-    environment:
-      GITLAB_REGISTRY_HOST: registry.gitlab.example.com
-      GITLAB_REGISTRY_HTTP_SECRET: "${REGISTRY_HTTP_SECRET}"
-      GITLAB_REGISTRY_HTTP_KEY: "${REGISTRY_HTTP_KEY}"
     depends_on:
       - gitlab
 
