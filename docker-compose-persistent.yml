@@ -1,5 +1,9 @@
 version: '3.9'
 
+networks:
+  foodio-network:
+    external: true
+
 services:
   db:
     image: postgres
