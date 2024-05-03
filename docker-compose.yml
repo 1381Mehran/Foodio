@@ -22,7 +22,7 @@ services:
       - '8000:8000'
 
     networks:
-      -foodio-network:
+      - foodio-network
 
 
 #    environment:
