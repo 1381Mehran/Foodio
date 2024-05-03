@@ -17,6 +17,9 @@ services:
       POSTGRES_DB: foodio_db
       POSTGRES_USER: postgres
 
+    networks:
+      - foodio-network
+
   redis:
     image: redis:7.2.4-alpine
     restart: always
@@ -25,12 +28,17 @@ services:
     ports:
       - '6379:6379'
 
+    networks:
+      - foodio-network
+
   rabbit-mq:
     image: rabbitmq:3.13.1-management-alpine
     container_name: foodio-pyamqp
     ports:
       - '5672:5672'
 
+    networks:
+      - foodio-network
 
 volumes:
   postgres_data:
