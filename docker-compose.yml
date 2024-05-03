@@ -3,9 +3,11 @@ version: '3.9'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+
+    image: foodio:latest
 
     restart: always
 
@@ -19,46 +21,17 @@ services:
     ports:
       - '8000:8000'
 
-    environment:
-      - GITLAB_HOST=gitlab.foodio
-      - GITLAB_PORT=80
-      - GITLAB_PROTOCOL=http
-      - DJANGO_SETTINGS_MODULE=foodio.settings
+#    environment:
+#      - GITLAB_HOST=gitlab.foodio
+#      - GITLAB_PORT=80
+#      - GITLAB_PROTOCOL=http
+#      - DJANGO_SETTINGS_MODULE=foodio.settings
 
-    depends_on:
-      - db
-      - redis
-      - gitlab
+#    depends_on:
+#      - db
+#      - redis
+#      - gitlab
 
-  db:
-    image: postgres
-    restart: always
-    container_name: foodio-db
-
-    ports:
-      - '5432:5432'
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: foodio_db
-      POSTGRES_USER: postgres
-
-  redis:
-    image: redis:7.2.4-alpine
-    restart: always
-    container_name: foodio-redis
-
-    ports:
-      - '6379:6379'
-
-  rabbit-mq:
-    image: rabbitmq:3.13.1-management-alpine
-    container_name: foodio-pyamqp
-    ports:
-      - '5672:5672'
 
   celery:
     container_name: foodio-celery
@@ -105,5 +78,3 @@ services:
 #    depends_on:
 #      - gitlab
 
-volumes:
-  postgres_data:
