@@ -48,12 +48,12 @@ services:
     volumes:
       - .:/app
 
+    networks:
+      - foodio-network
+
     depends_on:
       - app
       - redis
-
-    networks:
-      - foodio-network
 
 #  gitlab:
 #    image: 'gitlab/gitlab-ce:latest'
