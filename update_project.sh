@@ -2,7 +2,7 @@
 
 branch_name=$1
 
-if [[ -n "$branch_name" ]]
+if [[ -z "$branch_name" ]]
 then
 
   echo "invalid Branch name"
