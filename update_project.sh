@@ -5,7 +5,11 @@ branch_name=$1
 if [[ -z "$branch_name" ]]
 then
 
+  echo
+
   echo "invalid Branch name"
+
+  echo
 
 else
 
