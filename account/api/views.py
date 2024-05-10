@@ -302,7 +302,7 @@ class UserCardNumberView(APIView):
     )
     def get(self, request):
         serializer = self.serializer_class(
-            instance=request.user.card_numbers.all() if request.user.card_numbers.count() > 0 else [],
+            instance=request.user.card_numbers.all(),
             many=True
         )
         return Response(serializer.data)
