@@ -69,9 +69,9 @@ class CatView(APIView):
                 return Response({'error': 'Type is required'}, status=400)
 
         else:
-            main_cats = MainCat.objects.filter(active=True).only('id', 'title')
-            mid_cats = MidCat.objects.filter(active=True).only('id', 'title')
-            sub_cats = SubCat.objects.filter(active=True).only('id', 'title')
+            main_cats = MainCat.objects.filter(is_active=True).only('id', 'title')
+            mid_cats = MidCat.objects.filter(is_active=True).only('id', 'title')
+            sub_cats = SubCat.objects.filter(is_active=True).only('id', 'title')
 
             data = {
                 'main_cats': [{"id": _.id, "title": _.title} for _ in main_cats],

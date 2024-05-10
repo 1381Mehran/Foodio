@@ -12,11 +12,14 @@ python manage.py migrate
 
 # Docker Part
 
--- up -> docker-compose up -d --build
+- up - docker-compose up -d --build
 
--- down -> docker-compose down
+- down - docker-compose down
 
--- restart -> docker-compose restart
+- Restart - docker-compose restart
 
+# Linux Part
 
+### to run composes in the same network 
+- docker-compose -f docker-compose-persistent.yml -f docker-compose.yml up
 
