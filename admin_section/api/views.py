@@ -4,16 +4,17 @@ from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIView, get_object_or_404
 from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from foodio.celery import app as celery_app
 
-from product.models import Product
+from product.models import MainCat, MidCat, SubCat
 from .serializers import (
-    ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer, AcceptingSellerSerializer
+    ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer, AcceptingSellerSerializer,
+    CategorySerializer
 )
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSuperUser, IsAdminOrStaff, IsProductAdmin
@@ -195,6 +196,68 @@ class SellerAcceptanceView(APIView):
                 raise SerializerException(serializer.errors)
 
 
+# relating to Products Part
+
+
+class CatView(APIView):
+    permission_classes = [IsAuthenticated & IsProductAdmin]
+    renderer_classes = [CustomJSONRenderer]
+    serializer_class = CategorySerializer
+
+    def get(self, request, *args, **kwargs):
+
+        type_ = self.request.query_params.get('type')
+
+        class Type(Enum):
+            ACTIVE = 'True'
+            INACTIVE = 'False'
+
+        match type_:
+            case Type.ACTIVE.value:
+                type_ = Type.ACTIVE.value
+
+            case Type.INACTIVE.value:
+                type_ = Type.INACTIVE.value
+
+            case _:
+                type_ = Type.INACTIVE.value
+
+        instances = MainCat.objects.filter(is_active=type_)
+
+        serializer = self.serializer_class(instances=instances, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, pk, *args, **kwargs):
+
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            cat_type = serializer.validated_data.get('cat_type')
+            instance = self.category_interface(cat_type, pk)
+
+            for _ in ['title', 'active']:
+                value = serializer.validated_data.get(_)
+
+                setattr(instance, _, value)
+
+            return Response({'success': True}, status.HTTP_200_OK)
+        else:
+            raise SerializerException(serializer.errors)
+
+    @classmethod
+    def category_interface(cls, cat_type, pk):
+        class Type(Enum):
+            MAIN = 'main_cat'
+            MID = 'mid_cat'
+            SUB = 'sub_cat'
+
+        match cat_type:
+            case Type.MAIN.value:
+                return get_object_or_404(MainCat, pk=pk)
+            case Type.MID.value:
+                return get_object_or_404(MidCat, pk=pk)
+            case Type.SUB.value:
+                return get_object_or_404(SubCat, pk=pk)
 
 
 

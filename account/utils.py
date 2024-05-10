@@ -22,7 +22,7 @@ class Authentication:
 
     @property
     def password_generator(self):
-        selection_list = digits + ascii_letters + '!#$%&*+-/<=>?@\_~^'
+        selection_list = digits + ascii_letters + '!#$%&*+-/<=>?@_\^~'
         password = ''.join(secret_choice(selection_list) for _ in range(8))
 
         if (not any(True if char in ascii_uppercase else False for char in password) or

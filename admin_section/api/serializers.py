@@ -6,6 +6,8 @@ from django.contrib.auth.hashers import check_password
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
+from extensions.tools import category_schema
+from product.models import MainCat
 from ..models import Admin
 from account.utils import Authentication
 from seller.models import Seller
@@ -151,4 +153,36 @@ class AcceptingSellerSerializer(serializers.ModelSerializer):
             'not_confirmed_cause': {'required': False}
         }
 
+# Relating to Acceptance Categories
+
+
+class CategorySerializer(serializers.Serializer):
+
+    categories_list = []
+
+    title = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        write_only=True
+    )
+    active = serializers.BooleanField(
+        required=False,
+        write_only=True
+    )
+
+    categories = serializers.SerializerMethodField(read_only=True)
+
+    cat_type = serializers.CharField(max_length=7, write_only=True)
+
+    def get_categories(self, obj):
+        self.categories_list.append(category_schema(obj))
+        return self.categories_list
+
+    def validate_cat_type(self, value):
+        if value.lower() not in ['main_cat', 'mid_cat', 'sub_cat']:
+            raise ValidationError('active is invalid')
+
+        return value
 
