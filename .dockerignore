@@ -32,4 +32,4 @@ docker-compose.yml
 *.rej
 Thumbs.db
 db.sqlite3
-
+update_project.sh
