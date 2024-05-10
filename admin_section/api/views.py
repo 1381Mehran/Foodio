@@ -1,7 +1,7 @@
 from enum import Enum, unique
 
 from django.db import IntegrityError
-from django.db.models import Value
+from django.db.models import Value, Case
 from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
@@ -224,7 +224,7 @@ class CatView(APIView):
                 type_ = Type.INACTIVE.value
 
         main_cats = MainCat.objects.filter(is_active=type_).annotate(type=Value("main_cat")).annotate(
-            parent_id=Value(None)
+            parent_id=Case(default=Value(None))
         )
 
         mid_cats = MidCat.objects.filter(is_active=type_).annotate(type=Value("mid_cat"))
