@@ -301,7 +301,10 @@ class UserCardNumberView(APIView):
         security=[{'Bearer': []}]
     )
     def get(self, request):
-        serializer = self.serializer_class(instance=request.user.card_numbers.all(), many=True)
+        serializer = self.serializer_class(
+            instance=request.user.card_numbers.all() if request.user.card_numbers.count() > 0 else None,
+            many=True
+        )
         return Response(serializer.data)
 
     def post(self, request):
