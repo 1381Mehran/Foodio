@@ -14,7 +14,8 @@ then
 else
 
   git pull origin "$branch_name" --rebase
-  #docker compose -f docker-compose-persistent.yml -f docker-compose.yml down
+
+  docker compose -f docker-compose-persistent.yml -f docker-compose.yml down
 
   docker build -f Dockerfile -t foodio:latest .
 
