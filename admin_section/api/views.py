@@ -1,6 +1,7 @@
 from enum import Enum, unique
 
 from django.db import IntegrityError
+from django.db.models import Value
 from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
@@ -222,7 +223,11 @@ class CatView(APIView):
             case _:
                 type_ = Type.INACTIVE.value
 
-        instances = MainCat.objects.filter(is_active=type_)
+        main_cats = MainCat.objects.filter(is_active=type_).annotate(type=Value("main_cat")).annotate(parent_id=None)
+        mid_cats = MidCat.objects.filter(is_active=type_).annotate(type=Value("mid_cat"))
+        sub_cats = SubCat.objects.filter(is_active=type_).annotate(type=Value("sub_cat"))
+
+        instances = main_cats.union(mid_cats, sub_cats)
 
         serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)

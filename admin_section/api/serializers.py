@@ -158,8 +158,6 @@ class AcceptingSellerSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.Serializer):
 
-    categories_list = []
-
     title = serializers.CharField(
         max_length=100,
         required=False,
@@ -172,13 +170,7 @@ class CategorySerializer(serializers.Serializer):
         write_only=True
     )
 
-    categories = serializers.SerializerMethodField(read_only=True)
-
     cat_type = serializers.CharField(max_length=7, write_only=True)
-
-    def get_categories(self, obj):
-        self.categories_list.append(category_schema(obj))
-        return self.categories_list
 
     def validate_cat_type(self, value):
         if value.lower() not in ['main_cat', 'mid_cat', 'sub_cat']:
@@ -186,3 +178,33 @@ class CategorySerializer(serializers.Serializer):
 
         return value
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation['main_cat'] = {}
+        representation['mid_cat'] = {}
+        representation['sub_cat'] = {}
+        self.fields['main_cat'].read_only = True
+        self.fields['mid_cat'].read_only = True
+        self.fields['sub_cat'].read_only = True
+
+        class CatType(Enum):
+            MAIN = 'main_cat'
+            MID = 'mid_cat'
+            SUB = 'sub_cat'
+
+        def insert_cat(type_): return representation[type_].update({
+                    'id': instance.id,
+                    'title': instance.title,
+                    'active': instance.is_active,
+                })
+
+        match instance.type:
+            case CatType.MAIN.value:
+                insert_cat(CatType.MAIN.value)
+
+            case CatType.MID.value:
+                insert_cat(CatType.MID.value)
+
+            case CatType.SUB.value:
+                insert_cat(CatType.SUB.value)
