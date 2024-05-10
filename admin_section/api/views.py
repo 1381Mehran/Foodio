@@ -224,7 +224,7 @@ class CatView(APIView):
 
         instances = MainCat.objects.filter(is_active=type_)
 
-        serializer = self.serializer_class(instances=instances, many=True)
+        serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):
