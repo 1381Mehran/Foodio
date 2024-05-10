@@ -1,10 +1,19 @@
 #!/bin/bash
 
-git pull origin $1 --rebase
+branch_name=$1
 
-#docker compose -f docker-compose-persistent.yml -f docker-compose.yml down
+if [ -n "$branch_name" ]
+then
 
-docker build -f Dockerfile -t foodio:latest .
+  echo "invalid Branch name"
 
-docker compose -f docker-compose-persistent.yml -f docker-compose.yml up
+else
 
+  git pull origin $branch_name --rebase
+  #docker compose -f docker-compose-persistent.yml -f docker-compose.yml down
+
+  docker build -f Dockerfile -t foodio:latest .
+
+  docker compose -f docker-compose-persistent.yml -f docker-compose.yml up
+
+fi
