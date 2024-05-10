@@ -172,10 +172,6 @@ class CategorySerializer(serializers.Serializer):
 
     cat_type = serializers.CharField(max_length=7, write_only=True)
 
-    main_cats = serializers.DictField(read_only=True)
-    mid_cats = serializers.DictField(read_only=True)
-    sub_cats = serializers.DictField(read_only=True)
-
     def validate_cat_type(self, value):
         if value.lower() not in ['main_cat', 'mid_cat', 'sub_cat']:
             raise ValidationError('active is invalid')
@@ -184,6 +180,10 @@ class CategorySerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+
+        representation['main_cat'] = {}
+        representation['mid_cat'] = {}
+        representation['sub_cat'] = {}
 
         class CatType(Enum):
             MAIN = 'main_cat'
