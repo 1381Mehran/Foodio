@@ -9,5 +9,5 @@ urlpatterns = [
     re_path(r"^verify/?$", VerifyView.as_view(), name='api_verify'),
     re_path(r'^logout/?$', LogoutView.as_view(), name='api_logout'),
     re_path(r'^user-profile/?$', UserProfileView.as_view(), name='user_profile'),
-    re_path(r'^user-card/(?P<pk>[-\d]+)?/?$', UserCardNumberView.as_view(), name='user_card')
+    re_path(r'^card/(?P<pk>[-\d]+)?/?$', UserCardNumberView.as_view(), name='user_card')
 ]
