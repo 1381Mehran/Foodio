@@ -223,7 +223,10 @@ class CatView(APIView):
             case _:
                 type_ = Type.INACTIVE.value
 
-        main_cats = MainCat.objects.filter(is_active=type_).annotate(type=Value("main_cat")).annotate(parent_id=None)
+        main_cats = MainCat.objects.filter(is_active=type_).annotate(type=Value("main_cat")).annotate(
+            parent_id=Value(None)
+        )
+
         mid_cats = MidCat.objects.filter(is_active=type_).annotate(type=Value("mid_cat"))
         sub_cats = SubCat.objects.filter(is_active=type_).annotate(type=Value("sub_cat"))
 
