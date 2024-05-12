@@ -215,15 +215,14 @@ class CatView(APIView):
             ACTIVE = 'true', 'True'
             INACTIVE = 'false', 'False'
 
-        match type_:
-            case Type.ACTIVE.value:
-                type_ = Type.ACTIVE.value[1]
+        if type_ == Type.ACTIVE.value[0]:
+            type_ = Type.ACTIVE.value[1]
 
-            case Type.INACTIVE.value:
-                type_ = Type.INACTIVE.value[1]
+        elif type_ == Type.INACTIVE.value[0]:
+            type_ = Type.INACTIVE.value[1]
 
-            case _:
-                type_ = Type.INACTIVE.value[1]
+        else:
+            type_ = Type.INACTIVE.value[1]
 
         main_cats = MainCat.objects.filter(is_active=type_).only('id', 'title', 'is_active'
                                                                  ).annotate(type=Value("main_cat"))
