@@ -170,7 +170,7 @@ class CategorySerializer(serializers.Serializer):
         write_only=True
     )
 
-    cat_type = serializers.CharField(max_length=7, write_only=True)
+    cat_type = serializers.CharField(max_length=8, write_only=True)
 
     def validate_cat_type(self, value):
         if value.lower() not in ['main_cat', 'mid_cat', 'sub_cat']:
