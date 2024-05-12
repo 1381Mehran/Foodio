@@ -1,7 +1,7 @@
 from enum import Enum, unique
 
 from django.db import IntegrityError
-from django.db.models import Value, CharField
+from django.db.models import Value, CharField, Q
 from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
@@ -224,19 +224,31 @@ class CatView(APIView):
         else:
             type_ = Type.INACTIVE.value[1]
 
-        main_cats = MainCat.objects.filter(is_active=type_).only(
+        sub_cat = SubCat.objects.filter(is_active=type_)
+
+        # separate duplicate Categories in Mid_cat and Main cat
+
+        mid_cat = MidCat.objects.filter(~Q(id__in=sub_cat.values_list('parent_id')), is_active=type_)
+
+        main_cats = MainCat.objects.filter(
+            ~Q(id__in=sub_cat.values_list('parent__parent_id', flat=True)),
+            ~Q(id__in=mid_cat.values_list('parent_id', flat=True)),
+            is_active=type_
+        ).only(
             'id', 'title', 'is_active'
         ).annotate(
             type=Value("main_cat", output_field=CharField()),
         )
 
-        mid_cats = MidCat.objects.filter(is_active=type_).only(
+        mid_cats = mid_cat.only(
             'id', 'title', 'is_active'
         ).annotate(type=Value("mid_cat", output_field=CharField()))
 
-        sub_cats = SubCat.objects.filter(is_active=type_).only(
+        sub_cats = sub_cat.only(
             'id', 'title', 'is_active'
         ).annotate(type=Value("sub_cat", output_field=CharField()))
+
+        # combine all of QuerySets
 
         instances = main_cats.union(mid_cats, sub_cats)
 
