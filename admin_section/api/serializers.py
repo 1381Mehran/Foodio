@@ -181,30 +181,26 @@ class CategorySerializer(serializers.Serializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation['main_cat'] = {}
-        representation['mid_cat'] = {}
-        representation['sub_cat'] = {}
+        # representation['main_cat'] = {}
+        # representation['mid_cat'] = {}
+        # representation['sub_cat'] = {}
+
+        representation['categories'] = []
 
         class CatType(Enum):
             MAIN = 'main_cat'
             MID = 'mid_cat'
             SUB = 'sub_cat'
 
-        def insert_cat(type_): return representation[type_].update({
-                    'id': instance.id,
-                    'title': instance.title,
-                    'active': instance.is_active,
-                })
-
         match instance.type:
             case CatType.MAIN.value:
-                insert_cat(CatType.MAIN.value)
+                representation['categories'].append(category_schema(CatType.MAIN.value))
 
             case CatType.MID.value:
-                insert_cat(CatType.MID.value)
+                representation['categories'].append(category_schema(CatType.MID.value))
 
             case CatType.SUB.value:
-                insert_cat(CatType.SUB.value)
+                representation['categories'].append(category_schema(CatType.SUB.value))
 
         return representation
 
