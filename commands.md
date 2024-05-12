@@ -21,5 +21,5 @@ python manage.py migrate
 # Linux Part
 
 ### to run composes in the same network 
-- docker-compose -f docker-compose-persistent.yml -f docker-compose.yml up
+- docker compose -f docker-compose-persistent.yml -f docker-compose.yml up
 
