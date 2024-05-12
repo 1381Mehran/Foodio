@@ -205,13 +205,15 @@ class CatView(APIView):
     renderer_classes = [CustomJSONRenderer]
     serializer_class = CategorySerializer
 
+    # todo : (Feature) add Search property base on title in Get Method
+
     def get(self, request, *args, **kwargs):
 
         type_ = self.request.query_params.get('type')
 
         class Type(Enum):
-            ACTIVE = 'True'
-            INACTIVE = 'False'
+            ACTIVE = 'true'
+            INACTIVE = 'false'
 
         match type_:
             case Type.ACTIVE.value:
