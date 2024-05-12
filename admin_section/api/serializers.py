@@ -194,13 +194,13 @@ class CategorySerializer(serializers.Serializer):
 
         match instance.type:
             case CatType.MAIN.value:
-                representation['categories'].append(category_schema(CatType.MAIN.value))
+                representation['categories'].append(category_schema(instance))
 
             case CatType.MID.value:
-                representation['categories'].append(category_schema(CatType.MID.value))
+                representation['categories'].append(category_schema(instance))
 
             case CatType.SUB.value:
-                representation['categories'].append(category_schema(CatType.SUB.value))
+                representation['categories'].append(category_schema(instance))
 
         return representation
 
