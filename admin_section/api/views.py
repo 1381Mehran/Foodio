@@ -212,18 +212,18 @@ class CatView(APIView):
         type_ = self.request.query_params.get('type')
 
         class Type(Enum):
-            ACTIVE = 'true'
-            INACTIVE = 'false'
+            ACTIVE = 'true', 'True'
+            INACTIVE = 'false', 'False'
 
         match type_:
             case Type.ACTIVE.value:
-                type_ = Type.ACTIVE.value
+                type_ = Type.ACTIVE.value[1]
 
             case Type.INACTIVE.value:
-                type_ = Type.INACTIVE.value
+                type_ = Type.INACTIVE.value[1]
 
             case _:
-                type_ = Type.INACTIVE.value
+                type_ = Type.INACTIVE.value[1]
 
         main_cats = MainCat.objects.filter(is_active=type_).only('id', 'title', 'is_active'
                                                                  ).annotate(type=Value("main_cat"))
