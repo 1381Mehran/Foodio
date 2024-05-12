@@ -246,10 +246,13 @@ class CatView(APIView):
             cat_type = serializer.validated_data.get('cat_type')
             instance = self.category_interface(cat_type, pk)
 
-            for _ in ['title', 'active']:
-                value = serializer.validated_data.get(_)
+            if serializer.validated_data.get('active'):
+                instance.is_active = serializer.validated_data.get('active')
+                instance.save(update_fields=['is_active'])
 
-                setattr(instance, _, value)
+            if serializer.validated_data.get('title'):
+                instance.title = serializer.validated_data.get('title')
+                instance.save(update_fields=['title'])
 
             return Response({'success': True}, status.HTTP_200_OK)
         else:
