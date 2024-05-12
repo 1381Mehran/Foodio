@@ -185,8 +185,6 @@ class CategorySerializer(serializers.Serializer):
         # representation['mid_cat'] = {}
         # representation['sub_cat'] = {}
 
-        representation['categories'] = []
-
         class CatType(Enum):
             MAIN = 'main_cat'
             MID = 'mid_cat'
@@ -194,13 +192,13 @@ class CategorySerializer(serializers.Serializer):
 
         match instance.type:
             case CatType.MAIN.value:
-                representation['categories'].append(category_schema(instance))
+                representation.update(category_schema(instance))
 
             case CatType.MID.value:
-                representation['categories'].append(category_schema(instance))
+                representation.update(category_schema(instance))
 
             case CatType.SUB.value:
-                representation['categories'].append(category_schema(instance))
+                representation.update(category_schema(instance))
 
         return representation
 

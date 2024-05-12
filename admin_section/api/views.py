@@ -1,7 +1,7 @@
 from enum import Enum, unique
 
 from django.db import IntegrityError
-from django.db.models import Value, Case
+from django.db.models import Value, CharField
 from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
@@ -224,18 +224,23 @@ class CatView(APIView):
         else:
             type_ = Type.INACTIVE.value[1]
 
-        main_cats = MainCat.objects.filter(is_active=type_).only('id', 'title', 'is_active'
-                                                                 ).annotate(type=Value("main_cat"))
+        main_cats = MainCat.objects.filter(is_active=type_).only(
+            'id', 'title', 'is_active'
+        ).annotate(
+            type=Value("main_cat", output_field=CharField()),
+        )
 
-        mid_cats = MidCat.objects.filter(is_active=type_).only('id', 'title', 'is_active'
-                                                               ).annotate(type=Value("mid_cat"))
+        mid_cats = MidCat.objects.filter(is_active=type_).only(
+            'id', 'title', 'is_active'
+        ).annotate(type=Value("mid_cat", output_field=CharField()))
 
-        sub_cats = SubCat.objects.filter(is_active=type_).only('id', 'title', 'is_active'
-                                                               ).annotate(type=Value("sub_cat"))
+        sub_cats = SubCat.objects.filter(is_active=type_).only(
+            'id', 'title', 'is_active'
+        ).annotate(type=Value("sub_cat", output_field=CharField()))
 
         instances = main_cats.union(mid_cats, sub_cats)
 
-        serializer = self.serializer_class(instance=instances)
+        serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)
 
     def put(self, request, pk, *args, **kwargs):

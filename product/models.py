@@ -42,12 +42,15 @@ class MainCat(ProductCategorySchema):
         verbose_name = _('Main Category')
         verbose_name_plural = _('Main Categories')
 
+    def __str__(self):
+        return self.title
+
 
 class MidCat(ProductCategorySchema):
     parent = models.ForeignKey(
         MainCat,
         on_delete=models.CASCADE,
-        verbose_name=_('Mid Category'),
+        verbose_name=_('Main Category'),
         related_name='mid_cats'
     )
 
@@ -56,12 +59,15 @@ class MidCat(ProductCategorySchema):
         verbose_name = _('Mid Category')
         verbose_name_plural = _('Mid Categories')
 
+    def __str__(self):
+        return self.title
+
 
 class SubCat(ProductCategorySchema):
     parent = models.ForeignKey(
         MidCat,
         on_delete=models.CASCADE,
-        verbose_name=_('Sub Category'),
+        verbose_name=_('Mid Category'),
         related_name='sub_cats'
     )
 
@@ -70,10 +76,13 @@ class SubCat(ProductCategorySchema):
         verbose_name = _('Sub Category')
         verbose_name_plural = _('Sub Categories')
 
+    def __str__(self):
+        return self.title
 
 #######################################
 #       Products Models Schema        #
 #######################################
+
 
 class Product(models.Model):
     user = models.ForeignKey(
