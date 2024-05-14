@@ -3,6 +3,7 @@ from enum import Enum, unique
 from django.db import IntegrityError
 from django.db.models import Value, CharField, Q
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.search import TrigramSimilarity
 
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIView, get_object_or_404
@@ -210,6 +211,7 @@ class CatView(APIView):
     def get(self, request, *args, **kwargs):
 
         type_ = self.request.query_params.get('type')
+        search = self.request.query_params.get('search')
 
         class Type(Enum):
             ACTIVE = 'true', 'True'
@@ -251,6 +253,13 @@ class CatView(APIView):
         # combine all of QuerySets
 
         instances = main_cats.union(mid_cats, sub_cats)
+
+        # Search Feature for title
+
+        if search:
+            instances = instances.annotate(
+                similarity=TrigramSimilarity('title', search),
+            ).filter(similarity__gte=0.3).order_by('-similarity')
 
         serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)

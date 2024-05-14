@@ -18,6 +18,26 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 # Application definition
 
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'django_cleanup.apps.CleanupConfig',
+    'argon2',
+    'django_redis',
+    'drf_yasg',
+    'rest_framework_swagger',
+    'django.contrib.postgres',
+]
+
+APPS = [
+    'account.apps.AccountConfig',
+    'admin_section.apps.AdminSectionConfig',
+    'product.apps.ProductConfig',
+    'seller.apps.SellerConfig',
+    'foodio_info.apps.FoodioInfoConfig',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,21 +47,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Necessary apps
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
-    'django_cleanup.apps.CleanupConfig',
-    'argon2',
-    'django_redis',
-    'drf_yasg',
-    'rest_framework_swagger',
+    *THIRD_PARTY_APPS,
 
     # MyApps
-    'account.apps.AccountConfig',
-    'admin_section.apps.AdminSectionConfig',
-    'product.apps.ProductConfig',
-    'seller.apps.SellerConfig',
-    'foodio_info.apps.FoodioInfoConfig',
+    *APPS
 
 ]
 
