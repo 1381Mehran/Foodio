@@ -250,12 +250,24 @@ class CatView(APIView):
             'id', 'title', 'is_active'
         ).annotate(type=Value("sub_cat", output_field=CharField()))
 
+        # Search Feature implimantation
+
+        if search:
+            sub_cat = sub_cat.annotate(
+                similarity=TrigramSimilarity('title', search),
+            ).filter(similarity__gte=0.3).order_by('-similarity')
+
+            mid_cats = sub_cat.annotate(
+                similarity=TrigramSimilarity('title', search),
+            ).filter(similarity__gte=0.3).order_by('-similarity')
+
+            main_cats = main_cats.annotate(
+                similarity=TrigramSimilarity('title', search),
+            ).filter(similarity__gte=0.3).order_by('-similarity')
+
         # combine all of QuerySets
 
         instances = main_cats.union(mid_cats, sub_cats)
-
-        if search:
-            instances = instances.filter(title__icontains=search)
 
         serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)
