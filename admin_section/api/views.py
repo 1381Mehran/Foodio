@@ -254,12 +254,8 @@ class CatView(APIView):
 
         instances = main_cats.union(mid_cats, sub_cats)
 
-        # Search Feature for title
-
         if search:
-            instances = instances.annotate(
-                similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3).order_by('-similarity')
+            instances = instances.filter(title__icontains=search)
 
         serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)
