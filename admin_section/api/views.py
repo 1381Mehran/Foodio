@@ -255,15 +255,15 @@ class CatView(APIView):
         if search:
             sub_cat = sub_cat.annotate(
                 similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3).order_by('-similarity')
+            ).filter(similarity__gte=0.3)
 
             mid_cats = sub_cat.annotate(
                 similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3).order_by('-similarity')
+            ).filter(similarity__gte=0.3)
 
             main_cats = main_cats.annotate(
                 similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3).order_by('-similarity')
+            ).filter(similarity__gte=0.3)
 
         # combine all of QuerySets
 
