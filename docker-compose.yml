@@ -53,7 +53,6 @@ services:
 
     depends_on:
       - app
-      - redis
 
 #  gitlab:
 #    image: 'gitlab/gitlab-ce:latest'
