@@ -10,13 +10,18 @@ from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIVie
 from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, NotAcceptable
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from foodio.celery import app as celery_app
 
 from product.models import MainCat, MidCat, SubCat
 from .serializers import (
     ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer, AcceptingSellerSerializer,
-    CategorySerializer
+    CategorySerializer, AdminAddEditCatSerializer
 )
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSuperUser, IsAdminOrStaff, IsProductAdmin
@@ -202,12 +207,69 @@ class SellerAcceptanceView(APIView):
 
 
 class CatView(APIView):
+
+    """
+    get:
+        get list of cats by type Parameters
+
+        parameters :  [
+                type(optional): type of categories {active categories or another},
+                search(optional): Search based on categories title
+        ]
+
+    post:
+        Create Categories by product Admins
+        body : AddEditCatSerializer
+
+    put:
+        Update Categories by Product Admins
+
+        body : CategorySerializer
+
+    delete:
+            delete a category by id
+
+            body : [type(Required): this is required Option for find out type of category]
+
+    category_interface : method for manage categories instance
+
+    """
+
     permission_classes = [IsAuthenticated & IsProductAdmin]
     renderer_classes = [CustomJSONRenderer]
     serializer_class = CategorySerializer
+    post_serializer = AdminAddEditCatSerializer
 
-    # todo : (Feature) add Search property base on title in Get Method
+    class Type(Enum):
+        MAIN = 'main_cat'
+        MID = 'mid_cat'
+        SUB = 'sub_cat'
 
+    @swagger_auto_schema(
+        operation_summary="cat list",
+        operation_description="get list of cats by type Parameters",
+        manual_parameters=[
+            openapi.Parameter(
+                name='type',
+                in_=openapi.IN_QUERY,
+                description='type of categories',
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
+            openapi.Parameter(
+                name='search',
+                in_=openapi.IN_QUERY,
+                description='Search based on categories title',
+                type=openapi.TYPE_STRING,
+                required=False
+            )
+        ],
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', CategorySerializer)
+        }
+
+    )
+    @action(detail=True, methods=['GET'])
     def get(self, request, *args, **kwargs):
 
         type_ = self.request.query_params.get('type')
@@ -232,11 +294,41 @@ class CatView(APIView):
 
         mid_cat = MidCat.objects.filter(~Q(id__in=sub_cat.values_list('parent_id')), is_active=type_)
 
-        main_cats = MainCat.objects.filter(
+        main_cat = MainCat.objects.filter(
             ~Q(id__in=sub_cat.values_list('parent__parent_id', flat=True)),
             ~Q(id__in=mid_cat.values_list('parent_id', flat=True)),
             is_active=type_
-        ).only(
+        )
+
+        # Search Feature implimantation
+
+        if search:
+            # sub_cats = sub_cat.annotate(
+            #     similarity=TrigramSimilarity('title', search),
+            # ).filter(similarity__gte=0.3).annotate(type=Value("sub_cat", output_field=CharField()))
+            #
+            # mid_cats = sub_cat.annotate(
+            #     similarity=TrigramSimilarity('title', search),
+            # ).filter(similarity__gte=0.3).annotate(type=Value("mid_cat", output_field=CharField()))
+            #
+            # main_cats = main_cats.annotate(
+            #     similarity=TrigramSimilarity('title', search),
+            # ).filter(similarity__gte=0.3).annotate(type=Value("main_cat", output_field=CharField()))
+
+            sub_cat = sub_cat.filter(
+                Q(title__icontains=search) |
+                Q(parent__title__icontains=search) |
+                Q(parent__parent__title__icontains=search)
+            )
+            mid_cat = mid_cat.filter(
+                Q(title__icontains=search) |
+                Q(parent__title__icontains=search)
+            )
+            main_cat = main_cat.filter(title__icontains=search)
+
+        # Preparing Queries to Combine them togather
+
+        main_cats = main_cat.only(
             'id', 'title', 'is_active'
         ).annotate(
             type=Value("main_cat", output_field=CharField()),
@@ -244,26 +336,15 @@ class CatView(APIView):
 
         mid_cats = mid_cat.only(
             'id', 'title', 'is_active'
-        ).annotate(type=Value("mid_cat", output_field=CharField()))
+        ).annotate(
+            type=Value("mid_cat", output_field=CharField()),
+        )
 
         sub_cats = sub_cat.only(
             'id', 'title', 'is_active'
-        ).annotate(type=Value("sub_cat", output_field=CharField()))
-
-        # Search Feature implimantation
-
-        if search:
-            sub_cat = sub_cat.annotate(
-                similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3)
-
-            mid_cats = sub_cat.annotate(
-                similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3)
-
-            main_cats = main_cats.annotate(
-                similarity=TrigramSimilarity('title', search),
-            ).filter(similarity__gte=0.3)
+        ).annotate(
+            type=Value("sub_cat", output_field=CharField()),
+        )
 
         # combine all of QuerySets
 
@@ -272,41 +353,142 @@ class CatView(APIView):
         serializer = self.serializer_class(instance=instances, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="cat add",
+        operation_description="Add Category by Product Admin",
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description='id of cat',
+                required=False
+            )
+        ],
+        request_body=AdminAddEditCatSerializer,
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "success": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )),
+            status.HTTP_400_BAD_REQUEST: openapi.Response("Bad Request")
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.post_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True})
+
+        else:
+            raise SerializerException(serializer.errors)
+
+    @swagger_auto_schema(
+        operation_summary="cat Update",
+        operation_description="update Categories by Product Admins",
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_PATH,
+                type=openapi.TYPE_INTEGER,
+                description='id of cat',
+                required=True
+            )
+        ],
+        request_body=serializer_class,
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "success": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )),
+            status.HTTP_404_NOT_FOUND: openapi.Response("Not Found", openapi.Schema(type=openapi.TYPE_STRING)),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('invalid input')
+        }
+    )
+    @action(detail=True, methods=['PUT'])
     def put(self, request, pk, *args, **kwargs):
 
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            cat_type = serializer.validated_data.get('cat_type')
+            cat_type = serializer.validated_data.get('type')
             instance = self.category_interface(cat_type, pk)
 
-            if serializer.validated_data.get('active'):
-                instance.is_active = serializer.validated_data.get('active')
-                instance.save(update_fields=['is_active'])
+            if instance:
+                if serializer.validated_data.get('active'):
+                    instance.is_active = serializer.validated_data.get('active')
+                    instance.save(update_fields=['is_active'])
 
-            if serializer.validated_data.get('title'):
-                instance.title = serializer.validated_data.get('title')
-                instance.save(update_fields=['title'])
+                if serializer.validated_data.get('title'):
+                    instance.title = serializer.validated_data.get('title')
+                    instance.save(update_fields=['title'])
 
-            return Response({'success': True}, status.HTTP_200_OK)
+                return Response({'success': True}, status.HTTP_200_OK)
+            else:
+                raise NotFound(f"category with Id {pk} not found")
+
         else:
             raise SerializerException(serializer.errors)
 
+    @swagger_auto_schema(
+        operation_summary="cat Delete",
+        operation_description="Delete Categories by Product Admins",
+        manual_parameters=[
+           openapi.Parameter(
+               'id',
+               in_=openapi.IN_QUERY,
+               type=openapi.TYPE_STRING,
+               required=False,
+               description='dont\'t need to fill this field'
+            ),
+
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            description="type of category"
+        ),
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "success": openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )),
+            status.HTTP_404_NOT_FOUND: openapi.Response("Not Found", openapi.Schema(type=openapi.TYPE_STRING)),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('invalid input')
+        }
+    )
+    def delete(self, request, pk, *args, **kwargs):
+        type_ = self.request.data.get('type')
+
+        if type_ not in [self.Type.MAIN.value, self.Type.MID.value, self.Type.SUB.value]:
+            raise NotAcceptable(f"{type_} is not acceptable")
+
+        instance = self.category_interface(type_, pk)
+
+        if instance:
+
+            instance.delete()
+
+            return Response({'success': True}, status.HTTP_204_NO_CONTENT)
+
+        raise NotFound(f"category with Id {pk} not found")
+
     @classmethod
     def category_interface(cls, cat_type, pk):
-        class Type(Enum):
-            MAIN = 'main_cat'
-            MID = 'mid_cat'
-            SUB = 'sub_cat'
 
         match cat_type:
-            case Type.MAIN.value:
+            case cls.Type.MAIN.value:
                 return get_object_or_404(MainCat, pk=pk)
-            case Type.MID.value:
+            case cls.Type.MID.value:
                 return get_object_or_404(MidCat, pk=pk)
-            case Type.SUB.value:
+            case cls.Type.SUB.value:
                 return get_object_or_404(SubCat, pk=pk)
-
-
-
 

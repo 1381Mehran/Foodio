@@ -52,12 +52,18 @@ class AddEditCatSerializer(serializers.Serializer):
         allow_null=True,
     )
 
-    def validate_type(self, obj):
+    def validate_parent_id(self, value):
+        if value < 0:
+            raise ValidationError("Parent ID is zero and Positive Numbers")
+
+        return value
+
+    def validate_type(self, value):
         authorized_types = ['main_cat', 'mid_cat', 'sub_cat']
-        if obj not in authorized_types:
+        if value not in authorized_types:
             raise ValidationError('type is invalid')
 
-        return obj
+        return value
 
     def validate(self, attrs):
         request = self.context.get('request', None)

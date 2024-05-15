@@ -7,10 +7,11 @@ from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
 from extensions.tools import category_schema
-from product.models import MainCat
+from product.models import MainCat, MidCat, SubCat
 from ..models import Admin
 from account.utils import Authentication
 from seller.models import Seller
+from product.api.serializers import AddEditCatSerializer
 
 
 class ImprovePositionSerializer(serializers.Serializer):
@@ -170,11 +171,11 @@ class CategorySerializer(serializers.Serializer):
         write_only=True
     )
 
-    cat_type = serializers.CharField(max_length=8, write_only=True)
+    type = serializers.CharField(max_length=8, write_only=True)
 
-    def validate_cat_type(self, value):
+    def validate_type(self, value):
         if value.lower() not in ['main_cat', 'mid_cat', 'sub_cat']:
-            raise ValidationError('active is invalid')
+            raise ValidationError(f'{value} is invalid')
 
         return value
 
@@ -202,3 +203,50 @@ class CategorySerializer(serializers.Serializer):
 
         return representation
 
+
+class AdminAddEditCatSerializer(AddEditCatSerializer):
+
+    """
+    field_tips:
+        active: this field in db is "is_active" but I change name field for more security
+    """
+
+    active = serializers.BooleanField()
+
+    def create(self, validated_data):
+        @unique
+        class CatType(Enum):
+            MAIN_CAT = 'main_cat'
+            MID_CAT = 'mid_cat'
+            SUB_CAT = 'sub_cat'
+
+        match validated_data['type']:
+            case CatType.MAIN_CAT.value:
+                if not MainCat.objects.filter(title=validated_data['title']).exists():
+                    return MainCat.objects.create(
+                        title=validated_data['title'],
+                        is_active=validated_data['active'],
+                    )
+                else:
+                    raise ValidationError({'error': 'category is duplicated'})
+
+            case CatType.MID_CAT.value:
+                if not MidCat.objects.filter(title=validated_data['title']).exists():
+
+                    return MidCat.objects.create(
+                        title=validated_data['title'],
+                        parent_id=validated_data.get('parent_id'),
+                        is_active=validated_data['active'],
+                    )
+                else:
+                    raise ValidationError({'error': 'category is duplicated'})
+
+            case CatType.SUB_CAT.value:
+                if not SubCat.objects.filter(title=validated_data['title']).exists():
+                    return SubCat.objects.create(
+                        title=validated_data['title'],
+                        parent_id=validated_data.get('parent_id'),
+                        is_active=validated_data['active'],
+                    )
+                else:
+                    raise ValidationError({'error': 'category is duplicated'})

@@ -27,7 +27,6 @@ THIRD_PARTY_APPS = [
     'django_redis',
     'drf_yasg',
     'rest_framework_swagger',
-    'django.contrib.postgres',
 ]
 
 APPS = [
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     # Necessary apps
     *THIRD_PARTY_APPS,
