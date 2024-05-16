@@ -22,4 +22,4 @@ python manage.py migrate
 
 ### to run composes in the same network 
 - docker compose -f docker-compose-persistent.yml -f docker-compose.yml up
-
+- alias dcd="docker compose -f docker-compose-persistent.yml -f docker-compose.yml down"

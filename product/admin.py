@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import MainCat, MidCat, SubCat, Product, ProductImage, ProductProperty
+from .models import MainCat, MidCat, SubCat, Product, ProductImage, ProductProperty, Price
 
 
 # Relating to categories
@@ -49,12 +49,19 @@ class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('image', 'type', 'is_active')
 
 
+class ProductPriceInline(admin.TabularInline):
+    model = Price
+    list_display = ('price', 'is_active')
+    extra = 0
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'user_info', 'category', 'is_active')
     search_fields = ('title', 'user_info')
     list_editable = ('is_active',)
     # inlines = [ProductPropertyInline, ProductImageInline]
+    inlines = [ProductPriceInline]
 
     def user_info(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}" if obj.user.first_name and obj.user.last_name else \

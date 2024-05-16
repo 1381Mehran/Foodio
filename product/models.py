@@ -2,6 +2,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 
 from account.models import User
+from seller.models import Seller
 
 
 #######################################
@@ -85,10 +86,10 @@ class SubCat(ProductCategorySchema):
 
 
 class Product(models.Model):
-    user = models.ForeignKey(
-        User,
+    seller = models.ForeignKey(
+        Seller,
         on_delete=models.CASCADE,
-        verbose_name=_('User'),
+        verbose_name=_('Seller'),
         related_name='products',
     )
 
@@ -127,6 +128,22 @@ class Product(models.Model):
         db_table = 'Products'
         verbose_name = _('product')
         verbose_name_plural = _('products')
+
+
+class Price(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name=_('Product'),
+        related_name='prices'
+    )
+
+    price = models.DecimalField(max_digits=10, decimal_places=3, verbose_name=_('Price'))
+
+    is_active = models.BooleanField(default=False, verbose_name=_('is active'))
+
+    def __str__(self):
+        return f"{self.product.title} - {self.price}"
 
 
 class ProductImage(models.Model):
