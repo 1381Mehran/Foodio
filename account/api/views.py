@@ -83,6 +83,15 @@ class LoginView(APIView):
             result = authentication.login(phone, password)
 
             if isinstance(result, str) and result.isnumeric():
+
+                if (get_user_model().objects.filter(phone=phone).exists() and
+                        get_user_model().objects.get(phone=phone).email):
+                    SendMailThread(
+                        'شرکت جاوید',
+                        f'کد ورود شما : {result}',
+                        [get_user_model().objects.get(phone=phone).email],
+                    ).start()
+
                 return Response({"otp": f"{result}"}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': result}, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -150,15 +159,6 @@ class VerifyView(APIView):
                 if status_:
                     return Response(result, status.HTTP_201_CREATED)
                 else:
-
-                    if (get_user_model().objects.filter(phone=phone).exists() and
-                            get_user_model().objects.get(phone=phone).email):
-
-                        SendMailThread(
-                            'شرکت جاوید',
-                            f'کد ورود شما : {result}',
-                            [get_user_model().objects.get(phone=phone).email],
-                        ).start()
 
                     return Response(result)
 
