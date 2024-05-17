@@ -4,6 +4,7 @@ from rest_framework.serializers import ValidationError
 from product.api.serializers import GetCatSerializer
 from product.models import Product, SubCat
 from ..models import State, Seller
+from admin_section.api.serializers import ChangeAdminOrStaffPasswordSerializer
 
 
 class RetrieveStateSerializer(serializers.Serializer):
@@ -72,6 +73,10 @@ class SellerSerializer(serializers.ModelSerializer):
         read_only_fields = ('is_active', 'city')
         write_only_fields = ('state',)
         ref_name = 'Seller'
+
+
+class ChangeSellerPasswordSerializer(ChangeAdminOrStaffPasswordSerializer):
+    pass
 
 
 class ProductSerializer(serializers.ModelSerializer):

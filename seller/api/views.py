@@ -13,7 +13,7 @@ from drf_yasg import openapi
 from ..models import State, Seller
 from admin_section.permissions import IsSupportAdmin, IsTechnicalAdmin, IsSuperUser
 from .serializers import (RetrieveStateSerializer, CreateAndUpdateStateSerializer, SellerSerializer, ProductSerializer,
-                          RetrieveProductSerializer)
+                          RetrieveProductSerializer, ChangeSellerPasswordSerializer)
 from extensions.api_exceptions import SerializerException
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSeller, IsSellerProduct, IsAuthenticateSeller
@@ -238,6 +238,24 @@ class SellerView(APIView):
             self.permission_classes = [IsAuthenticated]
 
         return super(SellerView,self).get_permissions()
+
+
+class ChangeSellerPasswordView(APIView):
+    serializer_class = ChangeSellerPasswordSerializer
+    renderer_classes = [CustomJSONRenderer]
+    permission_classes = [IsAuthenticated & IsSeller]
+
+    def put(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = request.user
+            user.password = serializer.validated_data.get('new_password')
+            user.save(update_fields=['password'])
+
+            return Response({'success': True}, status.HTTP_202_ACCEPTED)
+
+        else:
+            raise SerializerException(serializer.errors)
 
 
 class ProductView(APIView):

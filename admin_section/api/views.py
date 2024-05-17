@@ -166,7 +166,8 @@ class SellerAcceptanceView(APIView):
         try:
             instance = Seller.objects.get(id=pk)
         except Seller.DoesNotExist:
-            return Response({'error': f'Seller with id {pk} does not found.'}, status=status.HTTP_404_NOT_FOUND)
+            raise NotFound(f'Seller with id {pk} does not found.')
+
         else:
             serializer = self.serializer_class(instance=instance, data=request.data, partial=True)
             if serializer.is_valid():
@@ -187,6 +188,8 @@ class SellerAcceptanceView(APIView):
                     instance.user.password = password
                     instance.user.save(update_fields=['password'])
                     instance.save(update_fields=["not_confirmed_cause", "celery_task_id"])
+
+                    # todo:(nearly bug) Send Password with Gmail to Seller user
 
                     return Response(
                         {
