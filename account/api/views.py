@@ -157,7 +157,7 @@ class VerifyView(APIView):
                         SendMailThread(
                             'شرکت جاوید',
                             f'کد ورود شما : {result}',
-                            get_user_model().objects.get(phone=phone).email,
+                            [get_user_model().objects.get(phone=phone).email],
                         ).start()
 
                     return Response(result)
