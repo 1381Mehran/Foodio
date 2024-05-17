@@ -35,6 +35,7 @@ APPS = [
     'product.apps.ProductConfig',
     'seller.apps.SellerConfig',
     'foodio_info.apps.FoodioInfoConfig',
+    'score.apps.ScoreConfig',
 ]
 
 INSTALLED_APPS = [

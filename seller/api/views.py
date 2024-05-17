@@ -78,10 +78,49 @@ class StateView(APIView):
 
 
 class SellerView(APIView):
-    renderer_classes = [CustomJSONRenderer]
 
+    """
+
+    post:
+        registering exist user for seller
+        body : SellerSerializer
+        conditions : user have to have the following requirements
+            1 - first name
+            2 - last name
+            3 - national id
+            4 - at least a card number
+
+    put:
+        Update seller information
+        body : SellerSerializer
+        kwargs -> pk: seller id
+
+    delete:
+        resignation user as Seller
+        kwargs -> pk: seller id
+
+    """
+
+    renderer_classes = [CustomJSONRenderer]
+    serializer_class = SellerSerializer
+
+    @swagger_auto_schema(
+        operation_summary='Create Seller',
+        operation_description='registering exist user for seller',
+        request_body=SellerSerializer,
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'success': openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request')
+        }
+
+    )
     def post(self, request):
-        serializer = SellerSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             if (request.user.first_name and request.user.last_name and request.user.national_id and
@@ -99,14 +138,43 @@ class SellerView(APIView):
         else:
             raise SerializerException(serializer.errors)
 
+    @swagger_auto_schema(
+        operation_summary='Update seller information',
+        manual_parameters=[
+            openapi.Parameter(
+                name='pk',
+                in_=openapi.IN_PATH,
+                description='seller_id',
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        request_body=SellerSerializer,
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'success': openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )),
+            status.HTTP_404_NOT_FOUND: openapi.Response('not found', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'detail': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request')
+        }
+
+    )
     def put(self, request, pk, *args, **kwargs):
         try:
             instance = Seller.objects.get(pk=pk)
         except Seller.DoesNotExist:
-            return Response({'error': f'Seller with id {pk} not found'}, status=404)
+            raise NotFound(f'Seller with id {pk} not found')
 
         else:
-            serializer = SellerSerializer(instance, data=request.data, partial=True)
+            serializer = self.serializer_class(instance, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'success': True}, status.HTTP_202_ACCEPTED)
@@ -114,11 +182,39 @@ class SellerView(APIView):
             else:
                 raise SerializerException(serializer.errors)
 
+    @swagger_auto_schema(
+        operation_summary='resignation Seller',
+        manual_parameters=[
+            openapi.Parameter(
+                name='pk',
+                in_=openapi.IN_PATH,
+                description='seller_id',
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        responses={
+            status.HTTP_200_OK: openapi.Response('success', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'success': openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                }
+            )),
+            status.HTTP_404_NOT_FOUND: openapi.Response('not found', openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'detail': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )),
+            status.HTTP_400_BAD_REQUEST: openapi.Response('Bad Request')
+        }
+
+    )
     def delete(self, request, pk, *args, **kwargs):
         try:
             instance = Seller.objects.get(pk=pk)
         except Seller.DoesNotExist:
-            return Response({'error': f'Seller with id {pk} not found'}, status=404)
+            raise NotFound(f'Seller with id {pk} not found')
 
         else:
             instance.delete()
