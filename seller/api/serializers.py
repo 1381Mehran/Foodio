@@ -62,12 +62,15 @@ class CreateAndUpdateStateSerializer(serializers.ModelSerializer):
 class SellerSerializer(serializers.ModelSerializer):
 
     state = serializers.PrimaryKeyRelatedField(queryset=State.objects.filter(
-        is_active=True, type='city', parent__isnull=False))
+        is_active=True, type='city', parent__isnull=False), write_only=True)
+
+    city = serializers.SlugRelatedField(slug_field='title', read_only=True, source='state')
 
     class Meta:
         model = Seller
-        fields = ('work_class', 'work_class_number', 'state', 'address', 'is_active')
-        read_only_fields = ('is_active',)
+        fields = ('work_class', 'work_class_number', 'state', 'city', 'address', 'is_active')
+        read_only_fields = ('is_active', 'city')
+        write_only_fields = ('state',)
         ref_name = 'Seller'
 
 
