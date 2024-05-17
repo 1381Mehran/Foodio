@@ -5,7 +5,7 @@ from .models import State, Seller
 
 @admin.register(State)
 class StateAdmin(admin.ModelAdmin):
-    list_display = ('title', 'is_active', 'created_at')
+    list_display = ('title', 'parent', 'is_active', 'created_at')
     list_editable = ('is_active',)
     search_fields = ('title',)
 
