@@ -19,10 +19,3 @@ class IsCatAdminOrReadOnly(BasePermission):
 
         else:
             return False
-
-
-class IsSellerProduct(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if obj.user == request.user:
-            return True
-        return False

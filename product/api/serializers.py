@@ -121,36 +121,3 @@ class AddEditCatSerializer(serializers.Serializer):
     #     return instance
 
 
-class ProductSerializer(serializers.ModelSerializer):
-
-    category = serializers.PrimaryKeyRelatedField(queryset=SubCat.objects.filter(is_active=True))
-
-    class Meta:
-        model = Product
-        fields = ('title', 'introduce', 'category', 'is_active')
-        read_only_fields = ('is_active',)
-
-
-class RetrieveProductSerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    category = serializers.SerializerMethodField()
-    title = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    introduce = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-    properties = serializers.SerializerMethodField()
-    images = serializers.SerializerMethodField()
-    is_active = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
-
-    def get_category(self, obj):
-        return GetCatSerializer(instance=obj.category, many=True).data
-
-    def get_properties(self, obj):
-        return [{'item_type': prop.item_type, 'item_name': prop.item_name, 'item_detail': prop.item_detail}
-                for prop in obj.product_properties.filter(is_active=True)]
-
-    def get_images(self, obj):
-
-        request = self.context.get('request', None)
-
-        return [{'type': img.item_type, "url": request.build_absolute_uri(img.image.url) if request else None}
-                for img in obj.product_images.filter(is_active=True)]
-
