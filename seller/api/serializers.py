@@ -66,7 +66,9 @@ class SellerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
-        fields = ('work_class', 'work_class_number', 'state', 'address')
+        fields = ('work_class', 'work_class_number', 'state', 'address', 'is_active')
+        read_only_fields = ('is_active',)
+        ref_name = 'Seller'
 
 
 class ProductSerializer(serializers.ModelSerializer):

@@ -138,6 +138,8 @@ class SellerSerializer(serializers.Serializer):
     def get_phone(self, obj):
         return obj.user.phone
 
+    class Meta:
+        ref_name = 'admin-section'
 
 class AcceptingSellerSerializer(serializers.ModelSerializer):
 

@@ -16,7 +16,7 @@ from .serializers import (RetrieveStateSerializer, CreateAndUpdateStateSerialize
                           RetrieveProductSerializer)
 from extensions.api_exceptions import SerializerException
 from extensions.renderers import CustomJSONRenderer
-from ..permissions import IsSeller, IsSellerProduct
+from ..permissions import IsSeller, IsSellerProduct, IsAuthenticateSeller
 from product.models import Product
 
 
@@ -81,6 +81,9 @@ class SellerView(APIView):
 
     """
 
+    get:
+        information about specific seller
+
     post:
         registering exist user for seller
         body : SellerSerializer
@@ -103,6 +106,11 @@ class SellerView(APIView):
 
     renderer_classes = [CustomJSONRenderer]
     serializer_class = SellerSerializer
+
+    def get(self, request, *args, **kwargs):
+        serializer = SellerSerializer(request.user.seller)
+        return Response(serializer.data)
+
 
     @swagger_auto_schema(
         operation_summary='Create Seller',
@@ -221,7 +229,10 @@ class SellerView(APIView):
             return Response({'success': True}, status.HTTP_204_NO_CONTENT)
 
     def get_permissions(self):
-        if self.request.method in ['PUT', 'DELETE']:
+        if self.request.method == 'GET':
+            self.permission_classes = [IsAuthenticated & IsAuthenticateSeller]
+
+        elif self.request.method in ['PUT', 'DELETE']:
             self.permission_classes = [IsSeller]
         else:
             self.permission_classes = [IsAuthenticated]
@@ -258,8 +269,8 @@ class ProductView(APIView):
             try:
                 instance = Product.objects.get(pk=pk)
             except Product.DoesNotExist:
+                raise NotFound(f'Product with id {pk} does not exist')
 
-                return Response({'error': f'Product with id {pk} does not exist'}, status=404)
             else:
                 serializer = RetrieveProductSerializer(instance, context={'request': request})
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -372,6 +383,6 @@ class ProductView(APIView):
         if self.request.method in ['GET', 'POST']:
             self.permission_classes = [IsAuthenticated]
         else:
-            self.permission_classes = [IsAuthenticated, IsSeller, IsSellerProduct]
+            self.permission_classes = [IsAuthenticated, IsSellerProduct]
 
         super(ProductView, self).get_permissions()
