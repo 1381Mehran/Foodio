@@ -137,7 +137,7 @@ class VerifyView(APIView):
             status.HTTP_400_BAD_REQUEST: 'problem'
         }
     )
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         authentication = Authentication()
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -158,7 +158,7 @@ class VerifyView(APIView):
                             'شرکت جاوید',
                             f'کد ورود شما : {result}',
                             get_user_model().objects.get(phone=phone).email,
-                        )
+                        ).start()
 
                     return Response(result)
 
@@ -190,7 +190,7 @@ class LogoutView(APIView):
             )
         }
     )
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
 
         authentication = Authentication()
         result, status_ = authentication.logout(request)
@@ -217,7 +217,7 @@ class UserProfileView(APIView):
         },
         security=[{'Bearer': []}]
     )
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(instance=request.user, context={'request': request})
         return Response(serializer.data)
 
@@ -230,7 +230,7 @@ class UserProfileView(APIView):
             status.HTTP_400_BAD_REQUEST: "Bad Request",
         }
     )
-    def put(self, request):
+    def put(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, instance=request.user, partial=True)
         if serializer.is_valid():
             for field in ['first_name', 'last_name', 'email', 'national_id', 'image']:
@@ -250,7 +250,7 @@ class UserProfileView(APIView):
             status.HTTP_204_NO_CONTENT: '{"success": True}',
         }
     )
-    def delete(self, request):
+    def delete(self, request, *args, **kwargs):
         request.user.delete()
         return Response({'success': True}, status.HTTP_204_NO_CONTENT)
 
@@ -300,14 +300,14 @@ class UserCardNumberView(APIView):
         },
         security=[{'Bearer': []}]
     )
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(
             instance=request.user.card_numbers.all(),
             many=True
         )
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.validated_data['user'] = request.user
@@ -316,7 +316,7 @@ class UserCardNumberView(APIView):
         else:
             raise SerializerException(serializer.errors)
 
-    def put(self, request, pk):
+    def put(self, request, pk, *args, **kwargs):
         try:
             instance = request.user.card_numbers.get(id=pk)
         except CardNumber.DoesNotExist:
@@ -329,7 +329,7 @@ class UserCardNumberView(APIView):
             else:
                 raise SerializerException(serializer.errors)
 
-    def delete(self, request, pk):
+    def delete(self, request, pk, *args, **kwargs):
         try:
             instance = request.user.card_numbers.get(id=pk)
         except CardNumber.DoesNotExist:
