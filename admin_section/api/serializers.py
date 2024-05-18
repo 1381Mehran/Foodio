@@ -204,7 +204,7 @@ class AdminAddEditCatSerializer(AddEditCatSerializer):
         active: this field in db is "is_active" but I change name field for more security
     """
 
-    active = serializers.BooleanField()
+    is_active = serializers.BooleanField()
 
     # def create(self, validated_data):
     #     @unique

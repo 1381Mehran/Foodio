@@ -50,16 +50,10 @@ class AddEditCatSerializer(serializers.Serializer):
         allow_null=True,
         allow_blank=True
     )
-    parent_id = serializers.PrimaryKeyRelatedField(
+    parent = serializers.PrimaryKeyRelatedField(
         queryset=ProductCategory.objects.filter(is_active=True),
         required=False
     )
-
-    def validate_parent_id(self, value):
-        if value < 0:
-            raise ValidationError("Parent ID is zero and Positive Numbers")
-
-        return value
 
     def validate_title(self, value):
         if ProductCategory.objects.filter(

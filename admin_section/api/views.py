@@ -1,9 +1,10 @@
 from enum import Enum, unique
 
 from django.db import IntegrityError
-from django.db.models import Value, CharField, Q
+from django.db.models import Q, OuterRef, Exists
+from django.db.models.functions import Greatest
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.search import TrigramSimilarity, SearchVector
+from django.contrib.postgres.search import TrigramSimilarity
 
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIView, get_object_or_404
@@ -11,7 +12,7 @@ from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, NotAcceptable
+from rest_framework.exceptions import NotFound
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -291,9 +292,13 @@ class CatView(APIView):
         else:
             type_ = Type.INACTIVE.value[1]
 
+        excludes = ProductCategory.objects.filter(
+            parent=OuterRef('pk'),
+        )
+
         query_set = ProductCategory.objects.filter(
             Q(is_active=type_) | Q(parent__is_active=type_) | Q(parent__parent__is_active=type_)
-        )
+        ).exclude(Exists(excludes))
 
         # separate duplicate Categories in Mid_cat and Main cat
 
@@ -309,10 +314,18 @@ class CatView(APIView):
 
         if search:
             query_set = query_set.annotate(
-                similarity=TrigramSimilarity(
-                    SearchVector('title', 'parent__title', 'parent__parent__title'), search
-                ),
-            ).filter(similarity__gte=0.3)
+                title_similarity=TrigramSimilarity('title', search),
+                parent_title_similarity=TrigramSimilarity('parent__title', search),
+                parent_parent_title_similarity=TrigramSimilarity('parent__parent__title', search),
+
+            ).annotate(
+                hightest_similarity=Greatest(
+                    'title_similarity',
+                    'parent_title_similarity',
+                    'parent_parent_title_similarity'
+                )
+            ).filter(hightest_similarity__gte=0.2)
+
             #
             # mid_cats = sub_cat.annotate(
             #     similarity=TrigramSimilarity('title', search),
