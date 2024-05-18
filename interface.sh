@@ -6,7 +6,12 @@ branch_name=$2
 if [[ -z "$mode" ]]
 then
 
-    case $mode in
+    echo "mode arg is necessary"
+    exit 1
+
+else
+
+  case $mode in
         "persistent")
             docker compose -f docker-compose-persistent.yml up
 
@@ -66,10 +71,5 @@ then
           exit 1
           ;;
     esac
-
-else
-
-  echo "mode arg is necessary"
-  exit 1
 
 fi
