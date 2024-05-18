@@ -11,65 +11,67 @@ then
 
 else
 
-  case $mode in
-        "persistent")
-            docker compose -f docker-compose-persistent.yml up
+    case $mode in
+          "persistent")
+              docker compose -f docker-compose-persistent.yml up
 
-            exit 0
+              exit 0
 
-            ;;
-        "start")
-            docker build -f Dockerfile -t foodio:latest .
-
-            docker -f docker-compose.yml up
-
-            exit 0
-
-            ;;
-        "update")
-            if [[ -z "$branch_name" ]]
-            then
-
-              docker -f docker-compose.yml down
-
-              git pull origin "$branch_name" --rebase
-
+              ;;
+          "start")
               docker build -f Dockerfile -t foodio:latest .
 
               docker -f docker-compose.yml up
 
               exit 0
 
-            else
-              echo
+              ;;
+          "update")
+              if [[ -z "$branch_name" ]]
+              then
 
-              echo "invalid Branch name"
+                echo
 
-              echo
+                echo "invalid Branch name"
 
-              exit 1
+                echo
 
-            fi
+                exit 1
+
+              else
+
+                docker -f docker-compose.yml down
+
+                git pull origin "$branch_name" --rebase
+
+                docker build -f Dockerfile -t foodio:latest .
+
+                docker -f docker-compose.yml up
+
+                exit 0
+
+              fi
+              ;;
+
+          "remove")
+              docker -f docker-compose.yml down
+
+              exit 0
+
+              ;;
+
+          "clean")
+              docker compose -f docker-compose-persistent.yml -f docker-compose.yml down
+
+              exit 0
+
+              ;;
+
+          *)
+
+            echo "Mode is invalid , please try again"
+            exit 1
             ;;
-
-        "remove")
-            docker -f docker-compose.yml down
-
-            exit 0
-
-            ;;
-
-        "clean")
-            docker compose -f docker-compose-persistent.yml -f docker-compose.yml down
-
-            exit 0
-
-            ;;
-
-        *)
-          echo "Mode is invalid , please try again"
-          exit 1
-          ;;
-    esac
+      esac
 
 fi
