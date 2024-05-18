@@ -21,7 +21,7 @@ else
           "start")
               docker build -f Dockerfile -t foodio:latest .
 
-              docker -f docker-compose.yml up
+              docker compose -f docker-compose.yml up
 
               exit 0
 
@@ -40,13 +40,13 @@ else
 
               else
 
-                docker -f docker-compose.yml down
+                docker compose -f docker-compose.yml down
 
                 git pull origin "$branch_name" --rebase
 
                 docker build -f Dockerfile -t foodio:latest .
 
-                docker -f docker-compose.yml up
+                docker compose -f docker-compose.yml up
 
                 exit 0
 
@@ -54,7 +54,7 @@ else
               ;;
 
           "remove")
-              docker -f docker-compose.yml down
+              docker compose -f docker-compose.yml down
 
               exit 0
 
