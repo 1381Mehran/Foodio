@@ -3,7 +3,7 @@ from enum import Enum, unique
 from django.db import IntegrityError
 from django.db.models import Value, CharField, Q
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.search import TrigramSimilarity
+from django.contrib.postgres.search import TrigramSimilarity, SearchVector
 
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, ListAPIView, get_object_or_404
@@ -18,7 +18,7 @@ from drf_yasg import openapi
 
 from foodio.celery import app as celery_app
 
-from product.models import MainCat, MidCat, SubCat
+from product.models import ProductCategory
 from .serializers import (
     ImprovePositionSerializer, ChangeAdminOrStaffPasswordSerializer, SellerSerializer, AcceptingSellerSerializer,
     CategorySerializer, AdminAddEditCatSerializer
@@ -291,24 +291,28 @@ class CatView(APIView):
         else:
             type_ = Type.INACTIVE.value[1]
 
-        sub_cat = SubCat.objects.filter(is_active=type_)
+        query_set = ProductCategory.objects.filter(
+            Q(is_active=type_) | Q(parent__is_active=type_) | Q(parent__parent__is_active=type_)
+        )
 
         # separate duplicate Categories in Mid_cat and Main cat
 
-        mid_cat = MidCat.objects.filter(~Q(id__in=sub_cat.values_list('parent_id')), is_active=type_)
-
-        main_cat = MainCat.objects.filter(
-            ~Q(id__in=sub_cat.values_list('parent__parent_id', flat=True)),
-            ~Q(id__in=mid_cat.values_list('parent_id', flat=True)),
-            is_active=type_
-        )
+        # mid_cat = MidCat.objects.filter(~Q(id__in=sub_cat.values_list('parent_id')), is_active=type_)
+        #
+        # main_cat = MainCat.objects.filter(
+        #     ~Q(id__in=sub_cat.values_list('parent__parent_id', flat=True)),
+        #     ~Q(id__in=mid_cat.values_list('parent_id', flat=True)),
+        #     is_active=type_
+        # )
 
         # Search Feature implimantation
 
         if search:
-            # sub_cats = sub_cat.annotate(
-            #     similarity=TrigramSimilarity('title', search),
-            # ).filter(similarity__gte=0.3).annotate(type=Value("sub_cat", output_field=CharField()))
+            query_set = query_set.annotate(
+                similarity=TrigramSimilarity(
+                    SearchVector('title', 'parent__title', 'parent__parent__title'), search
+                ),
+            ).filter(similarity__gte=0.3)
             #
             # mid_cats = sub_cat.annotate(
             #     similarity=TrigramSimilarity('title', search),
@@ -318,42 +322,42 @@ class CatView(APIView):
             #     similarity=TrigramSimilarity('title', search),
             # ).filter(similarity__gte=0.3).annotate(type=Value("main_cat", output_field=CharField()))
 
-            sub_cat = sub_cat.filter(
-                Q(title__icontains=search) |
-                Q(parent__title__icontains=search) |
-                Q(parent__parent__title__icontains=search)
-            )
-            mid_cat = mid_cat.filter(
-                Q(title__icontains=search) |
-                Q(parent__title__icontains=search)
-            )
-            main_cat = main_cat.filter(title__icontains=search)
+            # query_set = query_set.filter(
+            #     Q(title__icontains=search) |
+            #     Q(parent__title__icontains=search) |
+            #     Q(parent__parent__title__icontains=search)
+            # )
+            # mid_cat = mid_cat.filter(
+            #     Q(title__icontains=search) |
+            #     Q(parent__title__icontains=search)
+            # )
+            # main_cat = main_cat.filter(title__icontains=search)
 
         # Preparing Queries to Combine them togather
 
-        main_cats = main_cat.only(
-            'id', 'title', 'is_active'
-        ).annotate(
-            type=Value("main_cat", output_field=CharField()),
-        )
-
-        mid_cats = mid_cat.only(
-            'id', 'title', 'is_active'
-        ).annotate(
-            type=Value("mid_cat", output_field=CharField()),
-        )
-
-        sub_cats = sub_cat.only(
-            'id', 'title', 'is_active'
-        ).annotate(
-            type=Value("sub_cat", output_field=CharField()),
-        )
+        # main_cats = main_cat.only(
+        #     'id', 'title', 'is_active'
+        # ).annotate(
+        #     type=Value("main_cat", output_field=CharField()),
+        # )
+        #
+        # mid_cats = mid_cat.only(
+        #     'id', 'title', 'is_active'
+        # ).annotate(
+        #     type=Value("mid_cat", output_field=CharField()),
+        # )
+        #
+        # sub_cats = sub_cat.only(
+        #     'id', 'title', 'is_active'
+        # ).annotate(
+        #     type=Value("sub_cat", output_field=CharField()),
+        # )
 
         # combine all of QuerySets
 
-        instances = main_cats.union(mid_cats, sub_cats)
+        # instances = main_cats.union(mid_cats, sub_cats)
 
-        serializer = self.serializer_class(instance=instances, many=True)
+        serializer = self.serializer_class(instance=query_set, many=True)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -415,25 +419,24 @@ class CatView(APIView):
     @action(detail=True, methods=['PUT'])
     def put(self, request, pk, *args, **kwargs):
 
-        serializer = self.serializer_class(data=request.data)
+        instance = get_object_or_404(ProductCategory, pk=pk)
+
+        serializer = self.post_serializer(data=request.data, instance=instance, partial=True)
 
         if serializer.is_valid():
-            cat_type = serializer.validated_data.get('type')
-            instance = self.category_interface(cat_type, pk)
 
-            if instance:
-                if serializer.validated_data.get('active'):
-                    instance.is_active = serializer.validated_data.get('active')
-                    instance.save(update_fields=['is_active'])
 
-                if serializer.validated_data.get('title'):
-                    instance.title = serializer.validated_data.get('title')
-                    instance.save(update_fields=['title'])
+            # if serializer.validated_data.get('active'):
+            #     instance.is_active = serializer.validated_data.get('active')
+            #     instance.save(update_fields=['is_active'])
+            #
+            # if serializer.validated_data.get('title'):
+            #     instance.title = serializer.validated_data.get('title')
+            #     instance.save(update_fields=['title'])
 
-                return Response({'success': True}, status.HTTP_200_OK)
-            else:
-                raise NotFound(f"category with Id {pk} not found")
+            serializer.save()
 
+            return Response({'success': True}, status.HTTP_200_OK)
         else:
             raise SerializerException(serializer.errors)
 
@@ -465,33 +468,24 @@ class CatView(APIView):
                 }
             )),
             status.HTTP_404_NOT_FOUND: openapi.Response("Not Found", openapi.Schema(type=openapi.TYPE_STRING)),
-            status.HTTP_400_BAD_REQUEST: openapi.Response('invalid input')
         }
     )
     def delete(self, request, pk, *args, **kwargs):
-        type_ = self.request.data.get('type')
 
-        if type_ not in [self.Type.MAIN.value, self.Type.MID.value, self.Type.SUB.value]:
-            raise NotAcceptable(f"{type_} is not acceptable")
+        instance = get_object_or_404(ProductCategory, pk=pk)
 
-        instance = self.category_interface(type_, pk)
+        instance.delete()
 
-        if instance:
+        return Response({'success': True}, status.HTTP_204_NO_CONTENT)
 
-            instance.delete()
-
-            return Response({'success': True}, status.HTTP_204_NO_CONTENT)
-
-        raise NotFound(f"category with Id {pk} not found")
-
-    @classmethod
-    def category_interface(cls, cat_type, pk):
-
-        match cat_type:
-            case cls.Type.MAIN.value:
-                return get_object_or_404(MainCat, pk=pk)
-            case cls.Type.MID.value:
-                return get_object_or_404(MidCat, pk=pk)
-            case cls.Type.SUB.value:
-                return get_object_or_404(SubCat, pk=pk)
+    # @classmethod
+    # def category_interface(cls, cat_type, pk):
+    #
+    #     match cat_type:
+    #         case cls.Type.MAIN.value:
+    #             return get_object_or_404(MainCat, pk=pk)
+    #         case cls.Type.MID.value:
+    #             return get_object_or_404(MidCat, pk=pk)
+    #         case cls.Type.SUB.value:
+    #             return get_object_or_404(SubCat, pk=pk)
 

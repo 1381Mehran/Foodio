@@ -1,29 +1,35 @@
 from django.contrib import admin
-from .models import MainCat, MidCat, SubCat, Product, ProductImage, ProductProperty, Price
+from .models import ProductCategory, Product, ProductImage, ProductProperty, Price
 
 
-# Relating to categories
+# Relating to categorize
 
-@admin.register(MainCat)
-class MainCatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'is_active')
-    search_fields = ('title',)
+# @admin.register(MainCat)
+# class MainCatAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'title', 'is_active')
+#     search_fields = ('title',)
+#     list_editable = ('is_active',)
+#
+#
+# @admin.register(MidCat)
+# class MidCatAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'title', 'parent', 'is_active')
+#     search_fields = ('title',)
+#     list_editable = ('is_active',)
+#
+#
+# @admin.register(SubCat)
+# class SubCatAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'title', 'parent', 'is_active')
+#     search_fields = ('title',)
+#     list_editable = ('is_active',)
+
+@admin.register(ProductCategory)
+class ProductCategoryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'parent', 'is_active', 'created_at')
+    list_filter = ('title', 'is_active')
     list_editable = ('is_active',)
-
-
-@admin.register(MidCat)
-class MidCatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'parent', 'is_active')
     search_fields = ('title',)
-    list_editable = ('is_active',)
-
-
-@admin.register(SubCat)
-class SubCatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'parent', 'is_active')
-    search_fields = ('title',)
-    list_editable = ('is_active',)
-
 
 # Relating to products
 

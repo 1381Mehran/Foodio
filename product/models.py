@@ -12,6 +12,8 @@ from seller.models import Seller
 
 class ProductCategorySchema(models.Model):
 
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+
     title = models.CharField(
         _('title'),
         max_length=100,
@@ -36,46 +38,56 @@ class ProductCategorySchema(models.Model):
 #######################################
 
 
-class MainCat(ProductCategorySchema):
+# class MainCat(ProductCategorySchema):
+#
+#     class Meta:
+#         db_table = 'main_categories'
+#         verbose_name = _('Main Category')
+#         verbose_name_plural = _('Main Categories')
+#
+#     def __str__(self):
+#         return self.title
+#
+#
+# class MidCat(ProductCategorySchema):
+#     parent = models.ForeignKey(
+#         MainCat,
+#         on_delete=models.CASCADE,
+#         verbose_name=_('Main Category'),
+#         related_name='mid_cats'
+#     )
+#
+#     class Meta:
+#         db_table = 'mid_categories'
+#         verbose_name = _('Mid Category')
+#         verbose_name_plural = _('Mid Categories')
+#
+#     def __str__(self):
+#         return self.title
+#
+#
+# class SubCat(ProductCategorySchema):
+#     parent = models.ForeignKey(
+#         MidCat,
+#         on_delete=models.CASCADE,
+#         verbose_name=_('Mid Category'),
+#         related_name='sub_cats'
+#     )
+#
+#     class Meta:
+#         db_table = 'sub_categories'
+#         verbose_name = _('Sub Category')
+#         verbose_name_plural = _('Sub Categories')
+#
+#     def __str__(self):
+#         return self.title
+
+class ProductCategory(ProductCategorySchema):
 
     class Meta:
-        db_table = 'main_categories'
-        verbose_name = _('Main Category')
-        verbose_name_plural = _('Main Categories')
-
-    def __str__(self):
-        return self.title
-
-
-class MidCat(ProductCategorySchema):
-    parent = models.ForeignKey(
-        MainCat,
-        on_delete=models.CASCADE,
-        verbose_name=_('Main Category'),
-        related_name='mid_cats'
-    )
-
-    class Meta:
-        db_table = 'mid_categories'
-        verbose_name = _('Mid Category')
-        verbose_name_plural = _('Mid Categories')
-
-    def __str__(self):
-        return self.title
-
-
-class SubCat(ProductCategorySchema):
-    parent = models.ForeignKey(
-        MidCat,
-        on_delete=models.CASCADE,
-        verbose_name=_('Mid Category'),
-        related_name='sub_cats'
-    )
-
-    class Meta:
-        db_table = 'sub_categories'
-        verbose_name = _('Sub Category')
-        verbose_name_plural = _('Sub Categories')
+        db_table = 'categories'
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
 
     def __str__(self):
         return self.title
@@ -98,10 +110,10 @@ class Product(models.Model):
         , max_length=450
     )
     category = models.ForeignKey(
-        SubCat,
+        ProductCategory,
         on_delete=models.CASCADE,
-        related_name='product_categories',
-        verbose_name=_('Sub Category')
+        related_name='products',
+        verbose_name=_('Category')
     )
 
     introduce = models.TextField(

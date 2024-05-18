@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
 from extensions.tools import category_schema
-from product.models import MainCat, MidCat, SubCat
+from product.models import ProductCategory
 from ..models import Admin
 from account.utils import Authentication
 from seller.models import Seller
@@ -141,6 +141,7 @@ class SellerSerializer(serializers.Serializer):
     class Meta:
         ref_name = 'admin-section'
 
+
 class AcceptingSellerSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
@@ -160,26 +161,18 @@ class AcceptingSellerSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.Serializer):
-
-    title = serializers.CharField(
-        max_length=100,
-        required=False,
-        allow_blank=True,
-        allow_null=True,
-        write_only=True
-    )
-    active = serializers.BooleanField(
-        required=False,
-        write_only=True
-    )
-
-    type = serializers.CharField(max_length=8, write_only=True)
-
-    def validate_type(self, value):
-        if value.lower() not in ['main_cat', 'mid_cat', 'sub_cat']:
-            raise ValidationError(f'{value} is invalid')
-
-        return value
+    #
+    # title = serializers.CharField(
+    #     max_length=100,
+    #     required=False,
+    #     allow_blank=True,
+    #     allow_null=True,
+    #     write_only=True
+    # )
+    # active = serializers.BooleanField(
+    #     required=False,
+    #     write_only=True
+    # )
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -188,20 +181,18 @@ class CategorySerializer(serializers.Serializer):
         # representation['mid_cat'] = {}
         # representation['sub_cat'] = {}
 
-        class CatType(Enum):
-            MAIN = 'main_cat'
-            MID = 'mid_cat'
-            SUB = 'sub_cat'
 
-        match instance.type:
-            case CatType.MAIN.value:
-                representation.update(category_schema(instance))
+        # match instance.type:
+        #     case CatType.MAIN.value:
+        #         representation.update(category_schema(instance))
+        #
+        #     case CatType.MID.value:
+        #         representation.update(category_schema(instance))
+        #
+        #     case CatType.SUB.value:
+        #         representation.update(category_schema(instance))
 
-            case CatType.MID.value:
-                representation.update(category_schema(instance))
-
-            case CatType.SUB.value:
-                representation.update(category_schema(instance))
+        representation.update(category_schema(instance))
 
         return representation
 
@@ -215,40 +206,40 @@ class AdminAddEditCatSerializer(AddEditCatSerializer):
 
     active = serializers.BooleanField()
 
-    def create(self, validated_data):
-        @unique
-        class CatType(Enum):
-            MAIN_CAT = 'main_cat'
-            MID_CAT = 'mid_cat'
-            SUB_CAT = 'sub_cat'
-
-        match validated_data['type']:
-            case CatType.MAIN_CAT.value:
-                if not MainCat.objects.filter(title=validated_data['title']).exists():
-                    return MainCat.objects.create(
-                        title=validated_data['title'],
-                        is_active=validated_data['active'],
-                    )
-                else:
-                    raise ValidationError({'error': 'category is duplicated'})
-
-            case CatType.MID_CAT.value:
-                if not MidCat.objects.filter(title=validated_data['title']).exists():
-
-                    return MidCat.objects.create(
-                        title=validated_data['title'],
-                        parent_id=validated_data.get('parent_id'),
-                        is_active=validated_data['active'],
-                    )
-                else:
-                    raise ValidationError({'error': 'category is duplicated'})
-
-            case CatType.SUB_CAT.value:
-                if not SubCat.objects.filter(title=validated_data['title']).exists():
-                    return SubCat.objects.create(
-                        title=validated_data['title'],
-                        parent_id=validated_data.get('parent_id'),
-                        is_active=validated_data['active'],
-                    )
-                else:
-                    raise ValidationError({'error': 'category is duplicated'})
+    # def create(self, validated_data):
+    #     @unique
+    #     class CatType(Enum):
+    #         MAIN_CAT = 'main_cat'
+    #         MID_CAT = 'mid_cat'
+    #         SUB_CAT = 'sub_cat'
+    #
+    #     match validated_data['type']:
+    #         case CatType.MAIN_CAT.value:
+    #             if not MainCat.objects.filter(title=validated_data['title']).exists():
+    #                 return MainCat.objects.create(
+    #                     title=validated_data['title'],
+    #                     is_active=validated_data['active'],
+    #                 )
+    #             else:
+    #                 raise ValidationError({'error': 'category is duplicated'})
+    #
+    #         case CatType.MID_CAT.value:
+    #             if not MidCat.objects.filter(title=validated_data['title']).exists():
+    #
+    #                 return MidCat.objects.create(
+    #                     title=validated_data['title'],
+    #                     parent_id=validated_data.get('parent_id'),
+    #                     is_active=validated_data['active'],
+    #                 )
+    #             else:
+    #                 raise ValidationError({'error': 'category is duplicated'})
+    #
+    #         case CatType.SUB_CAT.value:
+    #             if not SubCat.objects.filter(title=validated_data['title']).exists():
+    #                 return SubCat.objects.create(
+    #                     title=validated_data['title'],
+    #                     parent_id=validated_data.get('parent_id'),
+    #                     is_active=validated_data['active'],
+    #                 )
+    #             else:
+    #                 raise ValidationError({'error': 'category is duplicated'})

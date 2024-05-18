@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
 from product.api.serializers import GetCatSerializer
-from product.models import Product, SubCat
+from product.models import Product, ProductCategory
 from ..models import State, Seller
 from admin_section.api.serializers import ChangeAdminOrStaffPasswordSerializer
 
@@ -81,7 +81,11 @@ class ChangeSellerPasswordSerializer(ChangeAdminOrStaffPasswordSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
 
-    category = serializers.PrimaryKeyRelatedField(queryset=SubCat.objects.filter(is_active=True))
+    category = serializers.PrimaryKeyRelatedField(queryset=ProductCategory.objects.filter(
+        is_active=True,
+        parent__isnull=False,
+        parent__parent__isnull=False,
+    ))
 
     class Meta:
         model = Product
