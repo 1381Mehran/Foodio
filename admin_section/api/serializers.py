@@ -243,3 +243,11 @@ class AdminAddEditCatSerializer(AddEditCatSerializer):
     #                 )
     #             else:
     #                 raise ValidationError({'error': 'category is duplicated'})
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+            instance.save(update_fields=[key])
+
+        return instance
+

@@ -25,6 +25,7 @@ from .serializers import (
     CategorySerializer, AdminAddEditCatSerializer
 )
 from extensions.renderers import CustomJSONRenderer
+from extensions.send_mail import SendMailThread
 from ..permissions import IsSuperUser, IsAdminOrStaff, IsProductAdmin
 from ..models import Admin, Staff
 from account.utils import Authentication
@@ -190,7 +191,11 @@ class SellerAcceptanceView(APIView):
                     instance.user.save(update_fields=['password'])
                     instance.save(update_fields=["not_confirmed_cause", "celery_task_id"])
 
-                    # todo:(nearly bug) Send Password with Gmail to Seller user
+                    SendMailThread(
+                        'شرکت جاوید',
+                        f" نام کاربری : {instance.user.phone} \n {password}رمز عبور : ",
+                        [instance.user.email],
+                    ).start()
 
                     return Response(
                         {
@@ -293,7 +298,7 @@ class CatView(APIView):
             type_ = Type.INACTIVE.value[1]
 
         excludes = ProductCategory.objects.filter(
-            parent=OuterRef('pk'),
+            parent=OuterRef('pk')
         )
 
         query_set = ProductCategory.objects.filter(
