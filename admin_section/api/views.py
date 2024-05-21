@@ -298,7 +298,8 @@ class CatView(APIView):
             type_ = Type.INACTIVE.value[1]
 
         excludes = ProductCategory.objects.filter(
-            parent=OuterRef('pk')
+            parent=OuterRef('pk'),
+            is_active=type_,
         )
 
         query_set = ProductCategory.objects.filter(
