@@ -1,7 +1,7 @@
 from enum import Enum, unique
 
 from django.db import IntegrityError
-from django.db.models import Q, OuterRef, Exists
+from django.db.models import Q, OuterRef, Exists, Case, When, Value
 from django.db.models.functions import Greatest
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.search import TrigramSimilarity
@@ -304,6 +304,26 @@ class CatView(APIView):
         query_set = ProductCategory.objects.filter(
             Q(is_active=type_) | Q(parent__is_active=type_) | Q(parent__parent__is_active=type_)
         ).exclude(Exists(excludes))
+
+        if type_ == 'True':
+            query_set = query_set.filter(
+                Q(
+                    Q(parent__isnull=True) &
+                    ~Q(is_active=False)
+                ) |
+                Q(
+                    Q(parent__isnull=False) &
+                    Q(parent__parent__isnull=True) &
+                    ~Q(is_active=False) &
+                    ~Q(parent__is_active=False)
+                ) |
+                Q(
+                    Q(parent__parent__isnull=False) &
+                    ~Q(is_active=False) &
+                    ~Q(parent__is_active=False) &
+                    ~Q(parent__parent__is_active=False)
+                )
+            )
 
         # separate duplicate Categories in Mid_cat and Main cat
 
