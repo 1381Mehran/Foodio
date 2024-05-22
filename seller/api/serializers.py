@@ -92,7 +92,7 @@ class ChangeSellerPasswordSerializer(ChangeAdminOrStaffPasswordSerializer):
 
 class ProductImagesSerializer(serializers.ModelSerializer):
 
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    product = serializers.PrimaryKeyRelatedField(read_only=True)
     image = AbsoluteURLImageField()
 
     class Meta:
@@ -100,6 +100,18 @@ class ProductImagesSerializer(serializers.ModelSerializer):
         fields = ('id', 'product', 'type', 'image')
         read_only_fields = ('id',)
         write_only_fields = ('product',)
+        extra_kwargs = {
+            'product': {'required': True},
+            'type': {'required': True},
+            'image': {'required': True},
+        }
+
+    def to_representation(self, instance):
+        representation = super(ProductImagesSerializer, self).to_representation(instance)
+
+        self.fields['product'].queryset = Product.objects.filter(seller__user_id=self.context.get('request').user.id)
+
+        return representation
 
 
 class ProductPropertySerializer(serializers.ModelSerializer):
@@ -110,6 +122,12 @@ class ProductPropertySerializer(serializers.ModelSerializer):
         model = ProductProperty
         fields = ('id', 'product', 'item_type', 'item_name', 'item_detail')
         read_only_fields = ('id',)
+        extra_kwargs = {
+            'product': {'required': True},
+            'item_type': {'required': True},
+            'item_name': {'required': True},
+            'item_detail': {'required': True},
+        }
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -126,8 +144,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'introduce', 'category', 'stock', 'is_active')
-        read_only_fields = ('id', 'is_active')
+        fields = ('id', 'title', 'introduce', 'category', 'stock', 'product_type', 'is_active')
+        read_only_fields = ('id', 'product_type', 'is_active')
 
     def to_representation(self, instance):
         representation = super(ProductSerializer, self).to_representation(instance)

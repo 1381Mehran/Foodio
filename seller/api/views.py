@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from enum import Enum
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,12 +12,16 @@ from drf_yasg import openapi
 
 from ..models import State, Seller
 from admin_section.permissions import IsSupportAdmin, IsTechnicalAdmin, IsSuperUser
-from .serializers import (RetrieveStateSerializer, CreateAndUpdateStateSerializer, SellerSerializer, ProductSerializer,
-                          ChangeSellerPasswordSerializer)
+
+from .serializers import (
+    RetrieveStateSerializer, CreateAndUpdateStateSerializer, SellerSerializer, ProductSerializer,
+    ChangeSellerPasswordSerializer, ProductImagesSerializer, ProductPropertySerializer
+)
+
 from extensions.api_exceptions import SerializerException
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSeller, IsSellerProduct, IsAuthenticateSeller
-from product.models import Product
+from product.models import Product, ProductImage, ProductProperty
 
 
 ##############################################################
@@ -269,6 +273,22 @@ class ChangeSellerPasswordView(APIView):
 
 
 class ProductView(APIView):
+
+    """
+    get :
+        List or Retrieve all products that relating to specific seller
+
+        query_parameters = [type(optional): seller product type]
+
+
+    """
+
+    class ProductType(Enum):
+        PUBLISHED = 'published'
+        PENDING = 'pending'
+        DRAFT = 'draft'
+        NOT_CONFIRMED = 'not_confirmed'
+
     renderer_classes = [CustomJSONRenderer]
     serializer_class = ProductSerializer
 
@@ -304,7 +324,27 @@ class ProductView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
         else:
-            serializer = self.serializer_class(instance=request.user.products.all(), many=True)
+
+            type_ = self.request.query_params.get('type', None)
+            queryset = request.user.products.all()
+
+            match type_:
+                case self.ProductType.PUBLISHED.value:
+                    queryset = queryset.filter(product_type=self.ProductType.PUBLISHED.value)
+
+                case self.ProductType.PENDING.value:
+                    queryset = queryset.filter(product_type=self.ProductType.PENDING.value)
+
+                case self.ProductType.DRAFT.value:
+                    queryset = queryset.filter(product_type=self.ProductType.DRAFT.value)
+
+                case self.ProductType.NOT_CONFIRMED.value:
+                    queryset = queryset.filter(product_type=self.ProductType.NOT_CONFIRMED.value)
+
+                case _:
+                    queryset = queryset.filter(product_type=self.ProductType.DRAFT.value)
+
+            serializer = self.serializer_class(instance=queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -367,6 +407,8 @@ class ProductView(APIView):
 
             serializer = self.serializer_class(instance=instance, data=request.data, partial=True)
             if serializer.is_valid():
+                serializer.validated_data.update({'is_active': False})
+                serializer.validated_data.update({'product_type': 'draft'})
                 serializer.save()
 
                 return Response({'success': True}, status.HTTP_202_ACCEPTED)
@@ -414,3 +456,89 @@ class ProductView(APIView):
             self.permission_classes = [IsAuthenticated, IsSellerProduct]
 
         super(ProductView, self).get_permissions()
+
+
+class ProductImageView(APIView):
+    permission_classes = [IsAuthenticated & IsSellerProduct]
+    serializer_class = ProductImagesSerializer
+
+    def get_object(self, request, pk):
+        instance = get_object_or_404(ProductImage, pk=pk, product__seller__user=request.user)
+        self.check_object_permissions(request, instance)
+
+        return instance
+
+    def put(self, request, pk, *args, **kwargs):
+
+        instance = self.get_object(request, pk)
+
+        serializer = self.serializer_class(
+            instance=instance,
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            instance.product.is_active = False
+            instance.product.product_type = 'draft'
+            instance.product.save(update_fields=['is_active', 'product_type'])
+
+            return Response({'success': True}, status.HTTP_202_ACCEPTED)
+
+        else:
+            raise SerializerException(serializer.errors)
+
+    def delete(self, request, pk, *args, **kwargs):
+        instance = self.get_object(request, pk)
+
+        instance.product.is_active = False
+        instance.product.product_type = 'draft'
+        instance.product.save(update_fields=['is_active', 'product_type'])
+
+        instance.delete()
+
+        return Response({'success': True}, status.HTTP_204_NO_CONTENT)
+
+
+class ProductPropertyView(APIView):
+    permission_classes = [IsAuthenticated & IsSellerProduct]
+    serializer_class = ProductPropertySerializer
+
+    def get_object(self, request, pk):
+        instance = get_object_or_404(ProductProperty, pk=pk, product__seller__user=request.user)
+        self.check_object_permissions(request, instance)
+        return instance
+
+    def put(self, request, pk, *args, **kwargs):
+        instance = self.get_object(request, pk)
+
+        serializer = self.serializer_class(
+            instance=instance,
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            instance.product.is_active = False
+            instance.product.product_type = 'draft'
+            instance.product.save(update_fields=['is_active', 'product_type'])
+
+            return Response({'success': True}, status.HTTP_202_ACCEPTED)
+
+        else:
+            raise SerializerException(serializer.errors)
+
+    def delete(self, request, pk, *args, **kwargs):
+        instance = self.get_object(request, pk)
+
+        instance.product.is_active = False
+        instance.product.product_type = 'draft'
+        instance.product.save(update_fields=['is_active', 'product_type'])
+
+        instance.delete()
+
+        return Response({'success': True}, status.HTTP_204_NO_CONTENT)

@@ -98,6 +98,13 @@ class ProductCategory(ProductCategorySchema):
 
 
 class Product(models.Model):
+
+    class ProductType(models.TextChoices):
+        PUBLISHED = 'published', _('Published')
+        PENDING = 'pending', _('Pending')
+        DRAFT = 'draft', _('Draft')
+        NOT_CONFIRMED = 'not_confirmed', _('Not Confirmed')
+
     seller = models.ForeignKey(
         Seller,
         on_delete=models.CASCADE,
@@ -125,6 +132,13 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(
         _('stock'),
         default=0
+    )
+
+    product_type = models.CharField(
+        _('type'),
+        choices=ProductType.choices,
+        default=ProductType.DRAFT,
+        max_length=13
     )
 
     celery_task_id = models.CharField(

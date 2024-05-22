@@ -11,7 +11,7 @@ class IsSeller(BasePermission):
 
 class IsAuthenticateSeller(BasePermission):
 
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if Seller.objects.filter(user=request.user).exists():
             return request.user.seller.is_active
 
