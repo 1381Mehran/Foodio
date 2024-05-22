@@ -57,7 +57,7 @@ else
 
               docker compose -f docker-compose.yml down
 
-              docker imgae prune
+              docker image prune
 
               exit 0
 
