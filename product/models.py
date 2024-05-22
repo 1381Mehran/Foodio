@@ -122,6 +122,11 @@ class Product(models.Model):
         blank=True
     )
 
+    stock = models.PositiveIntegerField(
+        _('stock'),
+        default=0
+    )
+
     celery_task_id = models.CharField(
         verbose_name=_('celery_task_id'),
         max_length=256,

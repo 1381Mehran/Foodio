@@ -54,7 +54,10 @@ else
               ;;
 
           "remove")
+
               docker compose -f docker-compose.yml down
+
+              docker imgae prune
 
               exit 0
 

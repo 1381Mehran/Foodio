@@ -13,11 +13,16 @@ from drf_yasg import openapi
 from ..models import State, Seller
 from admin_section.permissions import IsSupportAdmin, IsTechnicalAdmin, IsSuperUser
 from .serializers import (RetrieveStateSerializer, CreateAndUpdateStateSerializer, SellerSerializer, ProductSerializer,
-                          RetrieveProductSerializer, ChangeSellerPasswordSerializer)
+                          ChangeSellerPasswordSerializer)
 from extensions.api_exceptions import SerializerException
 from extensions.renderers import CustomJSONRenderer
 from ..permissions import IsSeller, IsSellerProduct, IsAuthenticateSeller
 from product.models import Product
+
+
+##############################################################
+#                       Seller Views                        #
+##############################################################
 
 
 class StateView(APIView):
@@ -258,6 +263,11 @@ class ChangeSellerPasswordView(APIView):
             raise SerializerException(serializer.errors)
 
 
+##############################################################
+#                       Product Views                        #
+##############################################################
+
+
 class ProductView(APIView):
     renderer_classes = [CustomJSONRenderer]
     serializer_class = ProductSerializer
@@ -276,7 +286,7 @@ class ProductView(APIView):
         ],
         responses={
             status.HTTP_200_OK: openapi.Response('Success', ProductSerializer),
-            "200-retrieve": openapi.Response('Success', RetrieveProductSerializer),
+            "200-retrieve": openapi.Response('Success', serializer_class),
             "404": openapi.Response('Product not found'),
             '400': openapi.Response('Bad Request')
         }
@@ -290,7 +300,7 @@ class ProductView(APIView):
                 raise NotFound(f'Product with id {pk} does not exist')
 
             else:
-                serializer = RetrieveProductSerializer(instance, context={'request': request})
+                serializer = self.serializer_class(instance)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
         else:
@@ -316,7 +326,7 @@ class ProductView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.validated_data['user'] = request.user
+            serializer.validated_data['seller'] = request.user
             serializer.save()
             return Response({'success': True}, status=status.HTTP_201_CREATED)
         else:
