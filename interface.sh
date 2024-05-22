@@ -57,7 +57,7 @@ else
 
               docker compose -f docker-compose.yml down
 
-              docker image prune
+              docker image prune -f
 
               exit 0
 
