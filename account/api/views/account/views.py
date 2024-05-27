@@ -10,9 +10,9 @@ from drf_yasg import openapi
 
 from extensions.renderers import CustomJSONRenderer
 from extensions.send_mail import SendMailThread
-from ..models import CardNumber
-from ..utils import Authentication
-from .serializers import AuthenticationSerializer, UserProfileSerializer, UserCardNumberSerializer
+from account.models import CardNumber
+from account.utils import Authentication
+from account.api.serializers import (AuthenticationSerializer, UserProfileSerializer, UserCardNumberSerializer)
 from extensions.api_exceptions import SerializerException
 
 

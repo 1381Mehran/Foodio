@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from .views import LoginView, VerifyView, LogoutView, UserProfileView, UserCardNumberView
+from account.api.views import (LoginView, VerifyView, LogoutView, UserProfileView, UserCardNumberView)
 
 app_name = 'api_account'
 
