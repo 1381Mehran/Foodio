@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 1m
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 1m
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'docker'
+    scrape_interval: 1m
+    static_configs:
+      - targets: ['docker:9323']
+
+remote_write:
+  - url: 'http://grafana:3000/api/prom/push'
+    basic_auth:
+      username: 'admin'
+      password: '<your_grafana_admin_password>'
