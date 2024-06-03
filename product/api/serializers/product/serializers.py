@@ -3,7 +3,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
-from ..models import Product, ProductCategory
+from product.models import ProductCategory
 from extensions.tools import category_schema
 
 
@@ -11,31 +11,6 @@ class GetCatSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super(GetCatSerializer, self).to_representation(instance)
-
-        # type_ = self.context.get('type', None)
-        #
-        # @unique
-        # class CatType(Enum):
-        #     MAIN_CAT = 'main_cat'
-        #     MID_CAT = 'mid_cat'
-        #     SUB_CAT = 'sub_cat'
-        #
-        # match type_:
-        #     case CatType.MAIN_CAT.value:
-        #         representation['main_cat'] = instance.title
-        #         representation['mid_cat'] = instance.mid_cats.filter(active=True).value_list('title', flat=True)
-        #         representation['sub_cat'] = [cat.sub_cats.filter(active=True).title for cat in instance.mid_cats
-        #                                      if cat.sub_cats.filter(active=True).title not in representation['sub_cat']]
-        #
-        #     case CatType.MID_CAT.value:
-        #         representation['mid_cat'] = instance.title
-        #         representation['main_cat'] = instance.main_cat.title
-        #         representation['sub_cat'] = instance.sub_cat.filter(active=True).title
-        #
-        #     case CatType.SUB_CAT.value:
-        #         representation['sub_cat'] = instance.title
-        #         representation['mid_cat'] = instance.parent.title
-        #         representation['main_cat'] = instance.parent.parent.title
 
         representation.update(category_schema(instance))
 
@@ -112,5 +87,3 @@ class AddEditCatSerializer(serializers.Serializer):
     #     instance.title = validated_data.get('title', instance.title)
     #     instance.save()
     #     return instance
-
-
