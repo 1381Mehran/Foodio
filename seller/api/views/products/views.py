@@ -202,7 +202,7 @@ class ProductView(APIView):
         else:
             self.permission_classes = [IsAuthenticated, IsSellerProduct]
 
-        super(ProductView, self).get_permissions()
+        return super(ProductView, self).get_permissions()
 
 
 class ProductImageView(APIView):
