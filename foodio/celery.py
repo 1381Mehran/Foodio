@@ -16,6 +16,11 @@ app.conf.update(
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+task_routes = ([
+    ('seller.tasks.*', {'queue': 'seller'}),
+    ('product.tasks.*', {'queue': 'product'}),
+])
+
 
 @app.task
 def add(x, y): return

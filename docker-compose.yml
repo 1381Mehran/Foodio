@@ -43,7 +43,7 @@ services:
     build:
       context: .
 
-    command: celery -A foodio worker -l INFO
+    command: celery -A foodio worker -l INFO -Q seller,product
 
     volumes:
       - .:/app
