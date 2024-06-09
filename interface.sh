@@ -59,6 +59,8 @@ else
 
               docker image prune -f
 
+              cd /home/mehran/Desktop/Django_projects/Foodio/logs/celery && rm celery*
+
               exit 0
 
               ;;
