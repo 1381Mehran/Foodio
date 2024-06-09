@@ -47,8 +47,8 @@ services:
     command: celery multi start 5 -A foodio -l INFO -Q:1-2 seller -Q:3-4 product -Q default --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log --detach
 
     volumes:
-      - ./logs:/var/log/celery
-      - ./logs:/var/run/celery
+      - ./logs/celery/:/var/log/celery
+      - ./logs/celery/:/var/run/celery
 
     networks:
       - foodio-network
