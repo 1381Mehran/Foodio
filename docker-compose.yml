@@ -44,7 +44,7 @@ services:
       context: .
 
 #    command: celery -A foodio worker -l INFO -Q seller,product
-    command: celery multi start 5 -A foodio -l INFO -Q:1-2 seller -Q:3-4 product -Q default -f /var/log/celery.log
+    command: celery multi start 5 -A foodio -l INFO -Q:1-2 seller -Q:3-4 product -Q default -L:1,2,3,4,5 INFO -f /var/log/celery.log
 
     volumes:
       - ./logs:/var/log
