@@ -90,8 +90,9 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
     command:
-      - --config.file=/etc/prometheus/prometheus.yml
+      - --config.file=/etc/prometheus/prometheus.yml --web.username=root --web.password=password
     ports:
       - "9090:9090"
     networks:
@@ -105,8 +106,10 @@ services:
     container_name: grafana
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana-date:/var/lib/grafana
+
     environment:
-      - GF_SECURITY_ADMIN_USERNAME=root
+      - GF_SECURITY_ADMIN_USER=root
       - GF_SECURITY_ADMIN_PASSWORD=password
     ports:
       - "3000:3000"
@@ -114,6 +117,11 @@ services:
       - foodio-network
     depends_on:
       - prometheus
+
+volumes:
+  grafana-data:
+  prometheus-data:
+
 
 networks:
   foodio-network:
