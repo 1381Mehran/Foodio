@@ -122,7 +122,6 @@ volumes:
   grafana-data:
   prometheus-data:
 
-
 networks:
   foodio-network:
     external: true

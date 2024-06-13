@@ -78,6 +78,9 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:password@mongo:27017/
       ME_CONFIG_BASICAUTH: false
 
+    networks:
+      - foodio-network
+
     depends_on:
       - mongodb
 
