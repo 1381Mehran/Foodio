@@ -23,3 +23,13 @@ python manage.py migrate
 ### to run composes in the same network 
 - docker compose -f docker-compose-persistent.yml -f docker-compose.yml up
 - alias dcd="docker compose -f docker-compose-persistent.yml -f docker-compose.yml down"
+
+# RabbitMQ
+
+### See list of queues in rabbit mq server with command :
+
+- sudo rabbitmqctl list_queues
+
+### See detail in rabbitmq server with cli
+
+- sudo rabbitmqctl list_queues name messages_ready messages_unacknowledged

@@ -34,6 +34,7 @@ services:
   rabbit-mq:
     image: rabbitmq:3.13.1-management-alpine
     container_name: foodio-pyamqp
+    restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=password
