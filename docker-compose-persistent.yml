@@ -79,8 +79,6 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: password
       ME_CONFIG_BASICAUTH: false
 
-    command: ['--net', 'host']
-
     links:
       - mongodb:mongodb
 
