@@ -68,7 +68,8 @@ services:
       - foodio-network
 
   mongo-express:
-    image: mongo-express:1.0.2-20-alpine3.19
+    image: mongo-express:0.54
+    container_name: mongo-express
     restart: always
     ports:
       - '8081:8081'
