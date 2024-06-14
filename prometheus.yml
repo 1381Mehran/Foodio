@@ -15,5 +15,5 @@ scrape_configs:
 remote_write:
   - url: 'http://grafana:3000/api/prom/push'
     basic_auth:
-      username: 'admin'
-      password: '<your_grafana_admin_password>'
+      username: 'root'
+      password: 'password'
