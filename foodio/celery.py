@@ -5,9 +5,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodio.settings')
 
 app = Celery('foodio')
 
-app.conf.update(
-    broker_connection_retry_on_startup=True
-)
 #
 # app.conf.task_routes = {
 #     'seller.tasks.check_seller_active': {'queue': 'queue1'},
@@ -21,6 +18,10 @@ task_routes = ([
     ('product.tasks.*', {'queue': 'product'}),
 ])
 
+
+app.conf.update(
+    broker_connection_retry_on_startup=True
+)
 
 @app.task
 def add(x, y): return
