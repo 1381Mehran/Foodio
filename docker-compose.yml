@@ -22,7 +22,8 @@ services:
       - '8000:8000'
 
     networks:
-      - foodio-network
+      foodio-network:
+        - ipv4_address: 192.168.10.1
 
 
 #    environment:
@@ -51,7 +52,8 @@ services:
       - ./logs/celery-pids/:/var/run/celery
 
     networks:
-      - foodio-network
+      foodio-network:
+        - ipv4_address: 192.168.10.2
 
     depends_on:
       - app
@@ -96,7 +98,8 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - foodio-network
+      foodio-network:
+        - ipv4_address: 192.168.10.8
     depends_on:
       - app
       - celery
@@ -114,7 +117,8 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - foodio-network
+      foodio-network:
+        - ipv4_address: 192.168.10.9
     depends_on:
       - prometheus
 
@@ -125,3 +129,6 @@ volumes:
 networks:
   foodio-network:
     external: true
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
