@@ -19,7 +19,7 @@ services:
 
     networks:
       foodio-network:
-        - ipv4_address: 192.168.10.3
+        ipv4_address: 192.168.10.3
 
   redis:
     image: redis:7.2.4-alpine
@@ -31,7 +31,7 @@ services:
 
     networks:
       foodio-network:
-        - ipv4_address: 192.168.10.4
+        ipv4_address: 192.168.10.4
 
   rabbit-mq:
     image: rabbitmq:3.13.1-management-alpine
@@ -50,7 +50,7 @@ services:
 
     networks:
       foodio-network:
-        - ipv4_address: 192.168.10.5
+        ipv4_address: 192.168.10.5
 
   rabbitmq_exporter:
     image: kbudde/rabbitmq-exporter
@@ -63,7 +63,7 @@ services:
 
     networks:
       foodio-network:
-        - ipv4_address: 192.168.10.10
+        ipv4_address: 192.168.10.10
 
   mongodb:
     image: mongo:4.4
@@ -88,7 +88,7 @@ services:
       - mongo-data:/data/db
     networks:
       foodio-network:
-        - ipv4_address: 192.168.10.6
+        ipv4_address: 192.168.10.6
 
   mongo-express:
     image: mongo-express:0.54
@@ -107,7 +107,7 @@ services:
 
     networks:
       foodio-network:
-        - ipv4_address: 192.168.10.7
+        ipv4_address: 192.168.10.7
 
     depends_on:
       - mongodb
