@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: postgres
-    restart: always
+    restart: unless-stopped
     container_name: foodio-db
 
     ports:
@@ -22,7 +22,7 @@ services:
 
   redis:
     image: redis:7.2.4-alpine
-    restart: always
+    restart: unless-stopped
     container_name: foodio-redis
 
     ports:
@@ -34,7 +34,7 @@ services:
   rabbit-mq:
     image: rabbitmq:3.13.1-management-alpine
     container_name: foodio-pyamqp
-    restart: always
+    restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=password
@@ -54,7 +54,7 @@ services:
 
     container_name: foodio-mongo
 
-    restart: always
+    restart: unless-stopped
 
     env_file:
       - .env
@@ -76,7 +76,7 @@ services:
   mongo-express:
     image: mongo-express:0.54
     container_name: mongo-express
-    restart: always
+    restart: unless-stopped
     ports:
       - '8081:8081'
     environment:

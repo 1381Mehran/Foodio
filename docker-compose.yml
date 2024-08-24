@@ -9,7 +9,7 @@ services:
 
     image: foodio:latest
 
-    restart: always
+    restart: unless-stopped
 
     container_name: foodio
 
@@ -47,8 +47,8 @@ services:
     command: celery multi start 5 -A foodio -l INFO -Q:1-2 seller -Q:3-4 product -Q default --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log --detach
 
     volumes:
-      - ./logs/celery/:/var/log/celery
-      - ./logs/celery/:/var/run/celery
+      - ./logs/celery-logs/:/var/log/celery
+      - ./logs/celery-pids/:/var/run/celery
 
     networks:
       - foodio-network
@@ -92,7 +92,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     command:
-      - --config.file=/etc/prometheus/prometheus.yml --web.username=root --web.password=password
+      - --config.file=/etc/prometheus/prometheus.yml --web.username=admin --web.password=root
     ports:
       - "9090:9090"
     networks:
@@ -109,8 +109,8 @@ services:
       - grafana-data:/var/lib/grafana
 
     environment:
-      - GF_SECURITY_ADMIN_USER=root
-      - GF_SECURITY_ADMIN_PASSWORD=password
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=root
     ports:
       - "3000:3000"
     networks:
