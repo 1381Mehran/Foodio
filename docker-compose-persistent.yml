@@ -38,8 +38,8 @@ services:
     container_name: foodio-pyamqp
     restart: unless-stopped
     environment:
-      - RABBITMQ_DEFAULT_USER=root
-      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=root
 
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
@@ -51,6 +51,19 @@ services:
     networks:
       foodio-network:
         - ipv4_address: 192.168.10.5
+
+  rabbitmq_exporter:
+    image: kbudde/rabbitmq-exporter
+    container_name: rabbitmq_exporter
+    environment:
+      RABBITMQ_URL: amqp://admin:root@rabbitmq:5672/
+
+    ports:
+      - "9419:9419"
+
+    networks:
+      foodio-network:
+        - ipv4_address: 192.168.10.10
 
   mongodb:
     image: mongo:4.4
