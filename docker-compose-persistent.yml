@@ -61,6 +61,9 @@ services:
     ports:
       - "9419:9419"
 
+    depends_on:
+      - rabbit-mq
+
     networks:
       foodio-network:
         ipv4_address: 192.168.10.10
