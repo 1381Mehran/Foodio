@@ -9,6 +9,12 @@ services:
     ports:
       - '5432:5432'
 
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -29,6 +35,12 @@ services:
     ports:
       - '6379:6379'
 
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+
     networks:
       foodio-network:
         ipv4_address: 192.168.10.4
@@ -40,6 +52,12 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=root
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
@@ -60,6 +78,12 @@ services:
 
     ports:
       - "9419:9419"
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
 
     depends_on:
       - rabbit-mq
@@ -84,6 +108,13 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
       MONGO_INITDB_USERNAME: ${MONGO_DB_USERNAME}
       MONGO_INITDB_PASSWORD: ${MONGO_DB_PASSWORD}
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
 
     ports:
       - '27017:27017'

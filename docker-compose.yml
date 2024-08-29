@@ -16,7 +16,7 @@ services:
     volumes:
       - .:/app
 
-    command: /bin/sh -c 'python manage.py migrate && python manage.py runserver 0.0.0.0:8000'
+    command: /bin/sh -c 'python manage.py migrate && gunicorn foodio.wsgi:application --bind 0.0.0.0:8000 --workers 3'
 
     ports:
       - '8000:8000'
@@ -95,11 +95,19 @@ services:
       - prometheus-data:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml --web.username=admin --web.password=root
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
     ports:
       - "9090:9090"
     networks:
       foodio-network:
         ipv4_address: 192.168.10.8
+
     depends_on:
       - app
       - celery
@@ -110,6 +118,12 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
     environment:
       - GF_SECURITY_ADMIN_USER=admin
