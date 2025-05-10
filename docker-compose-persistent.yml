@@ -124,27 +124,27 @@ services:
       foodio-network:
         ipv4_address: 192.168.10.6
 
-  mongo-express:
-    image: mongo-express:0.54
-    container_name: mongo-express
-    restart: unless-stopped
-    ports:
-      - '8081:8081'
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-      ME_CONFIG_BASICAUTH: false
+  # mongo-express:
+  #   image: mongo-express:0.54
+  #   container_name: mongo-express
+  #   restart: unless-stopped
+  #   ports:
+  #     - '8081:8081'
+  #   environment:
+  #     ME_CONFIG_MONGODB_SERVER: mongodb
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: password
+  #     ME_CONFIG_BASICAUTH: false
 
-    links:
-      - mongodb:mongodb
+  #   links:
+  #     - mongodb:mongodb
 
-    networks:
-      foodio-network:
-        ipv4_address: 192.168.10.7
+  #   networks:
+  #     foodio-network:
+  #       ipv4_address: 192.168.10.7
 
-    depends_on:
-      - mongodb
+  #   depends_on:
+  #     - mongodb
 
 volumes:
   postgres_data:
@@ -156,7 +156,7 @@ volumes:
 
 networks:
   foodio-network:
-    driver: bridge
+    driver: overlay
     name: foodio-network
     ipam:
       config:

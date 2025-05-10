@@ -1,6 +1,5 @@
 version: '3.9'
 
-
 services:
   app:
 #    build:
@@ -10,6 +9,13 @@ services:
     image: foodio:latest
 
     restart: unless-stopped
+
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1G
 
     container_name: foodio
 
@@ -41,8 +47,7 @@ services:
   celery:
     container_name: foodio-celery
 
-    build:
-      context: .
+    image: foodio:latest
 
 #    command: celery -A foodio worker -l INFO -Q seller,product
     command: celery multi start 5 -A foodio -l INFO -Q:1-2 seller -Q:3-4 product -Q default --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log --detach
@@ -143,6 +148,7 @@ volumes:
 networks:
   foodio-network:
     external: true
+    driver: overlay
     ipam:
       config:
         - subnet: 192.168.10.0/24

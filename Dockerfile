@@ -9,10 +9,6 @@ WORKDIR /app
 # activate virtual Environment
 COPY venv.sh /app
 
-RUN chmod +x venv.sh
-
-RUN ./venv.sh
-
 # Copy requirements.txt file
 
 COPY requirements.txt /app
