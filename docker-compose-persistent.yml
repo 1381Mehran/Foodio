@@ -1,19 +1,18 @@
-version: '3.9'
 
 services:
   db:
-    image: postgres
+    image: postgres:17.5-alpine3.21
     restart: unless-stopped
     container_name: foodio-db
 
     ports:
       - '5432:5432'
 
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 2G
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -24,8 +23,7 @@ services:
       POSTGRES_USER: postgres
 
     networks:
-      foodio-network:
-        ipv4_address: 192.168.10.3
+      - foodio-network
 
   redis:
     image: redis:7.2.4-alpine
@@ -35,15 +33,14 @@ services:
     ports:
       - '6379:6379'
 
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 1G
 
     networks:
-      foodio-network:
-        ipv4_address: 192.168.10.4
+      - foodio-network
 
   rabbit-mq:
     image: rabbitmq:3.13.1-management-alpine
@@ -53,11 +50,11 @@ services:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=root
 
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 512M
 
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
@@ -67,8 +64,7 @@ services:
       - '15672:15672'
 
     networks:
-      foodio-network:
-        ipv4_address: 192.168.10.5
+      - foodio-network
 
   rabbitmq_exporter:
     image: kbudde/rabbitmq-exporter
@@ -79,21 +75,20 @@ services:
     ports:
       - "9419:9419"
 
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 256M
 
     depends_on:
       - rabbit-mq
 
     networks:
-      foodio-network:
-        ipv4_address: 192.168.10.10
+      - foodio-network
 
   mongodb:
-    image: mongo:4.4
+    image: mongo:8.0-noble
 
     container_name: foodio-mongo
 
@@ -109,11 +104,11 @@ services:
       MONGO_INITDB_USERNAME: ${MONGO_DB_USERNAME}
       MONGO_INITDB_PASSWORD: ${MONGO_DB_PASSWORD}
 
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 1G
 
 
     ports:
@@ -121,8 +116,8 @@ services:
     volumes:
       - mongo-data:/data/db
     networks:
-      foodio-network:
-        ipv4_address: 192.168.10.6
+      - foodio-network
+        # ipv4_address: 192.168.10.6
 
   # mongo-express:
   #   image: mongo-express:0.54
@@ -154,10 +149,15 @@ volumes:
 
   mongo-data:
 
+# networks:
+#   foodio-network:
+#     driver: overlay
+#     name: foodio-network
+#     ipam:
+#       config:
+#         - subnet: 192.168.10.0/24
+
 networks:
   foodio-network:
-    driver: overlay
-    name: foodio-network
-    ipam:
-      config:
-        - subnet: 192.168.10.0/24
+    external: true
+    driver: bridge
